@@ -12,13 +12,13 @@ export default function App() {
       <Toaster
         position="top-right"
         toastOptions={{
-          style: { background: '#FEFCF8', color: '#2C2C2C', border: '1px solid #E4DDD0', fontFamily: 'DM Sans' },
-          success: { iconTheme: { primary: '#6B7B5E', secondary: '#FEFCF8' } },
-          error: { iconTheme: { primary: '#C4703F', secondary: '#FEFCF8' } },
+          style: { background: '#fff', color: '#111827', border: '1px solid #E5E7EB', fontFamily: 'DM Sans', fontWeight: 500 },
+          success: { iconTheme: { primary: '#2E5A88', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#C4703F', secondary: '#fff' } },
         }}
       />
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="flex-1 overflow-auto bg-cream-100">
+      <main className="flex-1 overflow-auto bg-surface-bg">
         {activeTab === 'analytics' ? <AnalyticsDashboard /> : <EditorPanel />}
       </main>
     </div>

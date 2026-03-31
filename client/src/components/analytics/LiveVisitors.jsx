@@ -18,37 +18,40 @@ export default function LiveVisitors({ visitors }) {
   }, [visitors]);
 
   return (
-    <div className="bg-white rounded-xl border border-cream-300 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-surface-border p-5 shadow-card">
       <div className="flex items-center gap-3 mb-4">
-        <div className="relative">
-          <div className="w-3 h-3 rounded-full bg-garden" />
-          <div className="absolute inset-0 w-3 h-3 rounded-full bg-garden animate-ping opacity-75" />
+        <div className="flex items-center gap-2 bg-garden/10 px-3 py-1 rounded-full">
+          <div className="relative">
+            <div className="w-2 h-2 rounded-full bg-garden" />
+            <div className="absolute inset-0 w-2 h-2 rounded-full bg-garden animate-ping opacity-75" />
+          </div>
+          <span className="text-[13px] font-semibold text-garden">Live</span>
         </div>
-        <h2 className="font-display text-xl font-bold text-text-primary">Live Visitors</h2>
-        <span className="ml-auto text-3xl font-display font-bold text-blue-primary">{visitors.length}</span>
+        <h2 className="font-display text-xl font-bold text-text-primary">Visitors</h2>
+        <span className="ml-auto text-4xl font-display font-bold text-blue-primary tabular-nums">{visitors.length}</span>
       </div>
 
       {visitors.length === 0 ? (
-        <p className="text-text-light text-sm italic">No active visitors right now</p>
+        <p className="text-text-muted text-sm py-4">No active visitors right now</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
           {visitors.map((v) => (
             <div
               key={v.visitor_id}
-              className={`bg-cream-100 rounded-lg p-3 border transition-all ${
-                newIds.has(v.visitor_id) ? 'border-garden/50 animate-fade-in shadow-md' : 'border-cream-300'
+              className={`bg-surface-raised rounded-lg px-3 py-2.5 border transition-all ${
+                newIds.has(v.visitor_id) ? 'border-garden/40 animate-fade-in shadow-raised' : 'border-surface-border'
               }`}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-garden animate-pulse-dot" />
-                <span className="text-xs font-mono text-text-light">{v.visitor_id.slice(0, 8)}</span>
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[11px] font-mono text-text-muted">{v.visitor_id.slice(0, 8)}</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-garden animate-pulse-dot" />
               </div>
-              <p className="text-sm text-text-primary truncate font-medium">{v.page_url}</p>
-              <div className="flex items-center gap-2 mt-1 text-xs text-text-secondary">
-                <span>{v.city && v.country ? `${v.city}, ${v.country}` : 'Unknown'}</span>
-                <span>·</span>
+              <p className="text-[13px] text-text-primary truncate font-semibold">{v.page_url}</p>
+              <p className="text-[11px] text-text-muted mt-0.5">
+                {v.city && v.country ? `${v.city}, ${v.country}` : 'Unknown'}
+                <span className="mx-1">·</span>
                 <span className="capitalize">{v.device || 'desktop'}</span>
-              </div>
+              </p>
             </div>
           ))}
         </div>

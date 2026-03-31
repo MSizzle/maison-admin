@@ -6,6 +6,7 @@
   body {
     font-weight: 500;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4 {
     font-weight: 700;
@@ -15,38 +16,31 @@
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: #D4CBC0 transparent;
+    scrollbar-color: #D1D5DB transparent;
   }
-  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar { width: 5px; height: 5px; }
   *::-webkit-scrollbar-track { background: transparent; }
-  *::-webkit-scrollbar-thumb { background: #D4CBC0; border-radius: 3px; }
-  *::-webkit-scrollbar-thumb:hover { background: #B8AFA4; }
+  *::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+  *::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
 }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.5); }
 }
-
-.animate-pulse-dot {
-  animation: pulse-dot 2s ease-in-out infinite;
-}
+.animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
 
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-in {
-  animation: fade-in-up 0.3s ease-out;
-}
+.animate-fade-in { animation: fade-in-up 0.25s ease-out; }
 
 .skeleton {
-  background: linear-gradient(90deg, #F0EAE0 25%, #E4DDD0 50%, #F0EAE0 75%);
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
-
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

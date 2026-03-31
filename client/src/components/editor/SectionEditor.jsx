@@ -7,8 +7,8 @@ const SECTION_INFO = {
   moulin: { title: 'Le Moulin', description: 'Le Moulin property page — all copy' },
   grange: { title: 'La Grange', description: 'La Grange property page — all copy' },
   jardin: { title: 'Le Jardin', description: 'Le Jardin property page — all copy' },
-  compound: { title: 'The Compound', description: 'Compound overview page — features, amenities, stats' },
-  explore: { title: 'Explore', description: 'Things to do page — activities, excursions' },
+  compound: { title: 'The Compound', description: 'Compound overview — features, amenities, stats' },
+  explore: { title: 'Explore', description: 'Things to do — activities, excursions' },
   catering: { title: 'Catering', description: 'Catering & private chef page' },
   wellness: { title: 'Wellness', description: 'Spa, yoga, and wellness offerings' },
   about: { title: 'About', description: 'About the property and owners' },
@@ -29,61 +29,43 @@ export default function SectionEditor({ sectionId, translations, onUpdate }) {
   );
 
   function updateTranslation(key, lang, value) {
-    onUpdate({
-      ...translations,
-      [key]: { ...translations[key], [lang]: value },
-    });
+    onUpdate({ ...translations, [key]: { ...translations[key], [lang]: value } });
   }
 
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-semibold text-gray-200">{info.title}</h3>
-        <p className="text-xs text-gray-500 mt-0.5">{info.description}</p>
-        <p className="text-[10px] text-gray-600 mt-1">{keys.length} translation keys</p>
+        <h3 className="text-[13px] font-bold text-text-primary">{info.title}</h3>
+        <p className="text-[11px] text-text-muted mt-0.5">{info.description}</p>
+        <p className="text-[10px] text-text-muted mt-0.5 tabular-nums">{keys.length} keys</p>
       </div>
 
-      {/* Controls */}
       <div className="flex gap-2">
         <input
           type="text"
           placeholder="Filter keys..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="flex-1 bg-dark-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 placeholder-gray-600 focus:border-accent focus:outline-none"
+          className="flex-1 bg-white border border-surface-border rounded-lg px-3 py-1.5 text-[12px] text-text-primary placeholder-text-muted focus:border-blue-primary focus:outline-none"
         />
-        <div className="flex gap-0.5 bg-dark-800 rounded-lg p-0.5 border border-gray-700">
-          <button
-            onClick={() => setEditingLang('en')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
-              editingLang === 'en' ? 'bg-accent text-white' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            EN
-          </button>
-          <button
-            onClick={() => setEditingLang('fr')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
-              editingLang === 'fr' ? 'bg-accent text-white' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            FR
-          </button>
-          <button
-            onClick={() => setEditingLang('both')}
-            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
-              editingLang === 'both' ? 'bg-accent text-white' : 'text-gray-400 hover:text-gray-200'
-            }`}
-          >
-            Both
-          </button>
+        <div className="flex gap-0.5 bg-surface-raised rounded-lg p-0.5 border border-surface-border">
+          {['en', 'fr', 'both'].map((lang) => (
+            <button
+              key={lang}
+              onClick={() => setEditingLang(lang)}
+              className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all uppercase ${
+                editingLang === lang ? 'bg-blue-primary text-white shadow-card' : 'text-text-muted hover:text-text-primary'
+              }`}
+            >
+              {lang === 'both' ? 'Both' : lang}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Translation entries */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {keys.length === 0 ? (
-          <p className="text-gray-500 text-sm text-center py-8">No translations found</p>
+          <p className="text-text-muted text-sm text-center py-8">No translations found</p>
         ) : (
           keys.map(([key, value]) => (
             <TranslationField
@@ -107,35 +89,29 @@ function TranslationField({ translationKey, value, editingLang, onUpdate }) {
   const inputProps = isLong ? { rows: 3 } : { type: 'text' };
 
   return (
-    <div className="bg-dark-800 rounded-lg p-3 group">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-[10px] font-mono text-gray-600 truncate">{shortKey}</span>
-      </div>
+    <div className="bg-surface-raised rounded-lg px-3 py-2.5 border border-surface-border group hover:border-surface-muted transition-colors">
+      <span className="text-[10px] font-mono text-text-muted block mb-1.5">{shortKey}</span>
 
       {(editingLang === 'en' || editingLang === 'both') && (
-        <div className="mb-2">
-          {editingLang === 'both' && (
-            <label className="block text-[10px] text-gray-500 mb-0.5 font-medium">English</label>
-          )}
+        <div className="mb-1.5">
+          {editingLang === 'both' && <label className="block text-[10px] text-text-muted mb-0.5 font-semibold">EN</label>}
           <InputTag
             {...inputProps}
             value={value.en || ''}
             onChange={(e) => onUpdate('en', e.target.value)}
-            className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:border-accent focus:outline-none resize-none"
+            className="w-full bg-white border border-surface-border rounded-md px-2.5 py-1.5 text-[12px] text-text-primary focus:border-blue-primary focus:outline-none resize-none"
           />
         </div>
       )}
 
       {(editingLang === 'fr' || editingLang === 'both') && (
         <div>
-          {editingLang === 'both' && (
-            <label className="block text-[10px] text-gray-500 mb-0.5 font-medium">Français</label>
-          )}
+          {editingLang === 'both' && <label className="block text-[10px] text-text-muted mb-0.5 font-semibold">FR</label>}
           <InputTag
             {...inputProps}
             value={value.fr || ''}
             onChange={(e) => onUpdate('fr', e.target.value)}
-            className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:border-accent focus:outline-none resize-none italic"
+            className="w-full bg-white border border-surface-border rounded-md px-2.5 py-1.5 text-[12px] text-text-primary focus:border-blue-primary focus:outline-none resize-none italic"
             placeholder={editingLang === 'both' ? 'French translation...' : undefined}
           />
         </div>

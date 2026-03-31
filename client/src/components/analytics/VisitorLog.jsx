@@ -7,15 +7,12 @@ export default function VisitorLog({ filters }) {
   const [sortField, setSortField] = useState('created_at');
   const [sortDir, setSortDir] = useState('desc');
 
-  useEffect(() => {
-    fetchEvents(1);
-  }, [filters]);
+  useEffect(() => { fetchEvents(1); }, [filters]);
 
   async function fetchEvents(page) {
     setLoading(true);
     const params = new URLSearchParams({
-      page: String(page),
-      limit: '25',
+      page: String(page), limit: '25',
       ...(filters.start && { start: filters.start }),
       ...(filters.end && { end: filters.end }),
       ...(filters.country && { country: filters.country }),
@@ -26,15 +23,12 @@ export default function VisitorLog({ filters }) {
       const data = await res.json();
       setEvents(data.events || []);
       setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
-    } catch {
-      setEvents([]);
-    }
+    } catch { setEvents([]); }
     setLoading(false);
   }
 
   const sorted = [...events].sort((a, b) => {
-    const va = a[sortField] ?? '';
-    const vb = b[sortField] ?? '';
+    const va = a[sortField] ?? '', vb = b[sortField] ?? '';
     if (typeof va === 'number') return sortDir === 'asc' ? va - vb : vb - va;
     return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
   });
@@ -55,57 +49,59 @@ export default function VisitorLog({ filters }) {
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-cream-300 overflow-hidden shadow-sm">
-      <div className="p-5 border-b border-cream-200 flex items-center justify-between">
-        <h2 className="font-display text-xl font-bold text-text-primary">Visitor Log</h2>
-        <span className="text-sm text-text-light">{pagination.total} total visits</span>
+    <div className="bg-white rounded-xl border border-surface-border overflow-hidden shadow-card">
+      {/* Header */}
+      <div className="px-5 py-4 flex items-center justify-between">
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-display text-xl font-bold text-text-primary">Visitor Log</h2>
+          <span className="text-[12px] text-text-muted font-medium tabular-nums">{pagination.total} visits</span>
+        </div>
       </div>
 
+      {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full">
           <thead>
-            <tr className="border-b border-cream-200 bg-cream-100/50">
+            <tr className="bg-blue-primary/[0.04] border-y border-surface-border">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   onClick={() => toggleSort(col.key)}
-                  className="text-left px-4 py-3 text-text-secondary font-medium cursor-pointer hover:text-text-primary select-none whitespace-nowrap text-xs uppercase tracking-wider"
+                  className="text-left px-4 py-2.5 text-[11px] font-bold text-blue-primary uppercase tracking-wider cursor-pointer hover:text-blue-dark select-none whitespace-nowrap font-display"
                 >
                   {col.label}
                   {sortField === col.key && (
-                    <span className="ml-1 text-blue-primary">{sortDir === 'asc' ? '↑' : '↓'}</span>
+                    <span className="ml-1 text-blue-light">{sortDir === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-surface-border">
             {loading ? (
-              Array.from({ length: 10 }).map((_, i) => (
-                <tr key={i} className="border-b border-cream-200/50">
+              Array.from({ length: 8 }).map((_, i) => (
+                <tr key={i}>
                   {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3">
-                      <div className="skeleton h-4 rounded w-20" />
-                    </td>
+                    <td key={col.key} className="px-4 py-3"><div className="skeleton h-3.5 rounded w-16" /></td>
                   ))}
                 </tr>
               ))
             ) : sorted.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center text-text-light italic">
+                <td colSpan={columns.length} className="px-4 py-16 text-center text-text-muted text-sm">
                   No events found
                 </td>
               </tr>
             ) : (
               sorted.map((evt) => (
-                <tr key={evt.id} className="border-b border-cream-200/50 hover:bg-cream-100/50 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-text-light">{evt.visitor_id?.slice(0, 8)}</td>
-                  <td className="px-4 py-3 text-text-primary max-w-[200px] truncate">{evt.page_url}</td>
-                  <td className="px-4 py-3 text-text-secondary">{evt.city && evt.country ? `${evt.city}, ${evt.country}` : 'Unknown'}</td>
-                  <td className="px-4 py-3 text-text-secondary capitalize">{evt.device}</td>
-                  <td className="px-4 py-3 text-text-secondary">{evt.browser}</td>
-                  <td className="px-4 py-3 text-text-secondary">{formatDuration(evt.duration_seconds)}</td>
-                  <td className="px-4 py-3 text-text-light whitespace-nowrap">{formatTime(evt.created_at)}</td>
+                <tr key={evt.id} className="hover:bg-surface-raised/50 transition-colors">
+                  <td className="px-4 py-2.5 font-mono text-[11px] text-text-muted">{evt.visitor_id?.slice(0, 8)}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-text-primary font-medium max-w-[200px] truncate">{evt.page_url}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-text-secondary">{evt.city && evt.country ? `${evt.city}, ${evt.country}` : '—'}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-text-secondary capitalize">{evt.device}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-text-secondary">{evt.browser}</td>
+                  <td className="px-4 py-2.5 text-[13px] text-text-muted tabular-nums">{formatDuration(evt.duration_seconds)}</td>
+                  <td className="px-4 py-2.5 text-[12px] text-text-muted whitespace-nowrap tabular-nums">{formatTime(evt.created_at)}</td>
                 </tr>
               ))
             )}
@@ -113,30 +109,31 @@ export default function VisitorLog({ filters }) {
         </table>
       </div>
 
+      {/* Pagination */}
       {pagination.pages > 1 && (
-        <div className="p-4 border-t border-cream-200 flex items-center justify-between">
-          <span className="text-sm text-text-light">
+        <div className="px-5 py-3 border-t border-surface-border flex items-center justify-between">
+          <span className="text-[12px] text-text-muted font-medium">
             Page {pagination.page} of {pagination.pages}
           </span>
-          <div className="flex gap-2">
-            <button
-              disabled={pagination.page <= 1}
-              onClick={() => fetchEvents(pagination.page - 1)}
-              className="px-3 py-1.5 text-sm bg-cream-100 rounded-lg border border-cream-300 disabled:opacity-40 hover:bg-cream-200 transition-colors text-text-secondary"
-            >
-              Previous
-            </button>
-            <button
-              disabled={pagination.page >= pagination.pages}
-              onClick={() => fetchEvents(pagination.page + 1)}
-              className="px-3 py-1.5 text-sm bg-cream-100 rounded-lg border border-cream-300 disabled:opacity-40 hover:bg-cream-200 transition-colors text-text-secondary"
-            >
-              Next
-            </button>
+          <div className="flex gap-1.5">
+            <PagBtn disabled={pagination.page <= 1} onClick={() => fetchEvents(pagination.page - 1)}>Prev</PagBtn>
+            <PagBtn disabled={pagination.page >= pagination.pages} onClick={() => fetchEvents(pagination.page + 1)}>Next</PagBtn>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function PagBtn({ children, disabled, onClick }) {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className="px-3 py-1 text-[12px] font-medium bg-surface-raised rounded-md border border-surface-border disabled:opacity-30 hover:bg-surface-bg hover:shadow-card transition-all text-text-secondary"
+    >
+      {children}
+    </button>
   );
 }
 

@@ -187,10 +187,10 @@ export default function EditorPanel() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Section Tree + Editor */}
-        <div className="w-[440px] border-r border-cream-300 flex flex-col overflow-hidden shrink-0">
+        <div className="w-[440px] border-r border-surface-border bg-white flex flex-col overflow-hidden shrink-0">
           {/* Section Tree */}
-          <div className="border-b border-gray-800 p-3 overflow-y-auto max-h-[280px]">
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2">
+          <div className="border-b border-surface-border p-3 overflow-y-auto max-h-[280px]">
+            <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2 px-2">
               Moulin à Rêves
             </h3>
             <div className="space-y-0.5">
@@ -201,7 +201,7 @@ export default function EditorPanel() {
                 label="Design System"
               />
               <div className="mt-2 mb-1 px-2">
-                <p className="text-[10px] font-medium text-gray-600 uppercase tracking-wider">Pages</p>
+                <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Pages</p>
               </div>
               {(siteData.sections || []).map((section) => (
                 <SectionButton
@@ -239,7 +239,7 @@ export default function EditorPanel() {
         </div>
 
         {/* Right: Live Preview */}
-        <div className="flex-1 overflow-hidden bg-dark-900">
+        <div className="flex-1 overflow-hidden bg-surface-bg">
           <PreviewFrame />
         </div>
       </div>
@@ -251,8 +251,8 @@ function SectionButton({ active, onClick, icon, label, count }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-        active ? 'bg-accent/10 text-accent' : 'text-gray-400 hover:text-gray-200 hover:bg-dark-800'
+      className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+        active ? 'bg-blue-50 text-blue-primary font-semibold' : 'text-text-secondary hover:text-text-primary hover:bg-surface-raised'
       }`}
     >
       {icon && (
@@ -260,9 +260,9 @@ function SectionButton({ active, onClick, icon, label, count }) {
           <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
         </svg>
       )}
-      {!icon && <span className="w-4 h-4 shrink-0 rounded bg-gray-700 text-[8px] flex items-center justify-center font-bold">{label?.[0]}</span>}
+      {!icon && <span className="w-4 h-4 shrink-0 rounded bg-surface-border text-[8px] flex items-center justify-center font-bold text-text-muted">{label?.[0]}</span>}
       <span className="truncate">{label}</span>
-      {count > 0 && <span className="ml-auto text-[10px] text-gray-600">{count}</span>}
+      {count > 0 && <span className="ml-auto text-[10px] text-text-muted tabular-nums">{count}</span>}
     </button>
   );
 }

@@ -29,41 +29,20 @@ export default function AnalyticsDashboard() {
   const filters = { ...dateRange, country: countryFilter, page_url: pageFilter };
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-8 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
         <div>
-          <h1 className="font-display text-3xl font-bold text-text-primary">Analytics</h1>
-          <p className="text-sm text-text-light mt-0.5">Visitor insights for Moulin à Rêves</p>
+          <h1 className="font-display text-3xl font-bold text-text-primary tracking-tight">Analytics</h1>
+          <p className="text-[13px] text-text-muted mt-1">Visitor insights for Moulin à Rêves</p>
         </div>
-        <div className="flex items-center gap-3">
-          <input
-            type="date"
-            value={dateRange.start.split('T')[0]}
-            onChange={(e) => setDateRange((r) => ({ ...r, start: e.target.value + 'T00:00:00' }))}
-            className="bg-white border border-cream-300 rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-blue-primary focus:outline-none shadow-sm"
-          />
-          <span className="text-text-light">to</span>
-          <input
-            type="date"
-            value={dateRange.end.split('T')[0]}
-            onChange={(e) => setDateRange((r) => ({ ...r, end: e.target.value + 'T23:59:59' }))}
-            className="bg-white border border-cream-300 rounded-lg px-3 py-1.5 text-sm text-text-primary focus:border-blue-primary focus:outline-none shadow-sm"
-          />
-          <input
-            type="text"
-            placeholder="Filter country..."
-            value={countryFilter}
-            onChange={(e) => setCountryFilter(e.target.value)}
-            className="bg-white border border-cream-300 rounded-lg px-3 py-1.5 text-sm text-text-primary placeholder-cream-500 focus:border-blue-primary focus:outline-none w-36 shadow-sm"
-          />
-          <input
-            type="text"
-            placeholder="Filter page..."
-            value={pageFilter}
-            onChange={(e) => setPageFilter(e.target.value)}
-            className="bg-white border border-cream-300 rounded-lg px-3 py-1.5 text-sm text-text-primary placeholder-cream-500 focus:border-blue-primary focus:outline-none w-36 shadow-sm"
-          />
+        <div className="flex items-center gap-2">
+          <FilterInput type="date" value={dateRange.start.split('T')[0]} onChange={(v) => setDateRange((r) => ({ ...r, start: v + 'T00:00:00' }))} />
+          <span className="text-text-muted text-xs">—</span>
+          <FilterInput type="date" value={dateRange.end.split('T')[0]} onChange={(v) => setDateRange((r) => ({ ...r, end: v + 'T23:59:59' }))} />
+          <div className="w-px h-6 bg-surface-border mx-1" />
+          <FilterInput type="text" placeholder="Country" value={countryFilter} onChange={setCountryFilter} className="w-28" />
+          <FilterInput type="text" placeholder="Page" value={pageFilter} onChange={setPageFilter} className="w-28" />
         </div>
       </div>
 
@@ -72,6 +51,18 @@ export default function AnalyticsDashboard() {
       <MapView filters={filters} />
       <VisitorLog filters={filters} />
     </div>
+  );
+}
+
+function FilterInput({ type, value, onChange, placeholder, className = '' }) {
+  return (
+    <input
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      className={`bg-white border border-surface-border rounded-lg px-3 py-1.5 text-[13px] text-text-primary placeholder-text-muted focus:border-blue-primary focus:ring-1 focus:ring-blue-primary/20 focus:outline-none shadow-card transition-shadow hover:shadow-raised ${className}`}
+    />
   );
 }
 
