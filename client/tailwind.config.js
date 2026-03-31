@@ -4,19 +4,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          700: '#1e293b',
-          800: '#1a1f2e',
-          850: '#151922',
-          900: '#0f1117',
-          950: '#0a0c10',
+        cream: {
+          50: '#FEFCF8',
+          100: '#FAF7F2',
+          200: '#F0EAE0',
+          300: '#E4DDD0',
+          400: '#D4CBC0',
+          500: '#B8AFA4',
         },
-        accent: {
-          DEFAULT: '#3B82F6',
-          hover: '#2563EB',
+        blue: {
+          primary: '#2E5A88',
+          dark: '#1B4F72',
+          light: '#5B8DB8',
+          pale: '#E8F0F8',
+          hover: '#24486E',
         },
+        text: {
+          primary: '#2C2C2C',
+          secondary: '#6B6B6B',
+          light: '#9A9A9A',
+        },
+        gold: '#B8860B',
+        garden: '#6B7B5E',
+        terracotta: '#C4703F',
+      },
+      fontFamily: {
+        display: ['Cormorant Garamond', 'Georgia', 'serif'],
+        body: ['DM Sans', '-apple-system', 'sans-serif'],
       },
     },
   },

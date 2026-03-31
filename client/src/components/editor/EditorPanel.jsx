@@ -186,7 +186,7 @@ export default function EditorPanel() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Section Tree + Editor */}
-        <div className="w-[440px] border-r border-gray-800 flex flex-col overflow-hidden shrink-0">
+        <div className="w-[440px] border-r border-cream-300 flex flex-col overflow-hidden shrink-0">
           {/* Section Tree */}
           <div className="border-b border-gray-800 p-3 overflow-y-auto max-h-[280px]">
             <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-2">

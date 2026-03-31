@@ -21,12 +21,15 @@ export default function Sidebar({ activeTab, onTabChange }) {
   ];
 
   return (
-    <aside className="w-16 lg:w-56 bg-dark-950 border-r border-gray-800 flex flex-col shrink-0">
-      <div className="h-16 flex items-center px-4 border-b border-gray-800">
-        <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-bold text-white text-sm">
+    <aside className="w-16 lg:w-60 bg-cream-50 border-r border-cream-300 flex flex-col shrink-0">
+      <div className="h-16 flex items-center px-4 border-b border-cream-300">
+        <div className="w-8 h-8 rounded-lg bg-blue-primary flex items-center justify-center font-display font-bold text-white text-sm">
           M
         </div>
-        <span className="ml-3 font-semibold text-sm hidden lg:block">Maison Admin</span>
+        <div className="ml-3 hidden lg:block">
+          <span className="font-display text-base font-semibold text-text-primary">Moulin à Rêves</span>
+          <p className="text-[10px] text-text-light -mt-0.5">Admin Dashboard</p>
+        </div>
       </div>
 
       <nav className="flex-1 py-4 space-y-1 px-2">
@@ -34,10 +37,10 @@ export default function Sidebar({ activeTab, onTabChange }) {
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
               activeTab === tab.id
-                ? 'bg-accent/10 text-accent'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-dark-800'
+                ? 'bg-blue-pale text-blue-primary font-medium shadow-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-cream-200/60'
             }`}
           >
             {tab.icon}
@@ -46,10 +49,10 @@ export default function Sidebar({ activeTab, onTabChange }) {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-cream-300">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-dot" />
-          <span className="text-xs text-gray-500 hidden lg:block">System Online</span>
+          <div className="w-2 h-2 rounded-full bg-garden animate-pulse-dot" />
+          <span className="text-xs text-text-light hidden lg:block">System Online</span>
         </div>
       </div>
     </aside>

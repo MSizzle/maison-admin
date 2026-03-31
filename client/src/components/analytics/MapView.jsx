@@ -23,8 +23,8 @@ function MapView({ filters }) {
   const maxCount = Math.max(1, ...locations.map((l) => l.count));
 
   return (
-    <div className="bg-dark-850 rounded-xl border border-gray-800 p-5 relative">
-      <h2 className="text-lg font-semibold mb-4">Visitor Map</h2>
+    <div className="bg-white rounded-xl border border-cream-300 p-5 relative shadow-sm">
+      <h2 className="font-display text-xl font-semibold text-text-primary mb-4">Visitor Map</h2>
 
       {loading ? (
         <div className="skeleton h-[400px] rounded-lg" />
@@ -41,12 +41,12 @@ function MapView({ filters }) {
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
-                      fill="#1e293b"
-                      stroke="#334155"
+                      fill="#F0EAE0"
+                      stroke="#D4CBC0"
                       strokeWidth={0.5}
                       style={{
                         default: { outline: 'none' },
-                        hover: { fill: '#334155', outline: 'none' },
+                        hover: { fill: '#E4DDD0', outline: 'none' },
                         pressed: { outline: 'none' },
                       }}
                     />
@@ -59,14 +59,14 @@ function MapView({ filters }) {
                   <Marker
                     key={i}
                     coordinates={[loc.lon, loc.lat]}
-                    onMouseEnter={() => setTooltip({ ...loc, x: loc.lon, y: loc.lat })}
+                    onMouseEnter={() => setTooltip(loc)}
                     onMouseLeave={() => setTooltip(null)}
                   >
                     <circle
                       r={size}
-                      fill="#3B82F6"
-                      fillOpacity={0.6}
-                      stroke="#3B82F6"
+                      fill="#2E5A88"
+                      fillOpacity={0.5}
+                      stroke="#2E5A88"
                       strokeWidth={1}
                       strokeOpacity={0.3}
                       style={{ cursor: 'pointer' }}
@@ -78,16 +78,16 @@ function MapView({ filters }) {
           </ComposableMap>
 
           {tooltip && (
-            <div className="absolute top-4 right-4 bg-dark-800 border border-gray-700 rounded-lg px-3 py-2 text-sm pointer-events-none">
-              <p className="font-medium">{tooltip.city}, {tooltip.country}</p>
-              <p className="text-gray-400">{tooltip.count} visit{tooltip.count !== 1 ? 's' : ''}</p>
+            <div className="absolute top-4 right-4 bg-white border border-cream-300 rounded-lg px-3 py-2 text-sm pointer-events-none shadow-md">
+              <p className="font-medium text-text-primary">{tooltip.city}, {tooltip.country}</p>
+              <p className="text-text-secondary">{tooltip.count} visit{tooltip.count !== 1 ? 's' : ''}</p>
             </div>
           )}
         </div>
       )}
 
       {!loading && locations.length === 0 && (
-        <p className="text-gray-500 text-sm text-center py-8">No location data available</p>
+        <p className="text-text-light text-sm text-center py-8 italic">No location data available</p>
       )}
     </div>
   );

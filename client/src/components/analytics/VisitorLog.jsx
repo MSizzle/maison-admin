@@ -55,25 +55,25 @@ export default function VisitorLog({ filters }) {
   ];
 
   return (
-    <div className="bg-dark-850 rounded-xl border border-gray-800 overflow-hidden">
-      <div className="p-5 border-b border-gray-800 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Visitor Log</h2>
-        <span className="text-sm text-gray-500">{pagination.total} total visits</span>
+    <div className="bg-white rounded-xl border border-cream-300 overflow-hidden shadow-sm">
+      <div className="p-5 border-b border-cream-200 flex items-center justify-between">
+        <h2 className="font-display text-xl font-semibold text-text-primary">Visitor Log</h2>
+        <span className="text-sm text-text-light">{pagination.total} total visits</span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-800">
+            <tr className="border-b border-cream-200 bg-cream-100/50">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   onClick={() => toggleSort(col.key)}
-                  className="text-left px-4 py-3 text-gray-400 font-medium cursor-pointer hover:text-gray-200 select-none whitespace-nowrap"
+                  className="text-left px-4 py-3 text-text-secondary font-medium cursor-pointer hover:text-text-primary select-none whitespace-nowrap text-xs uppercase tracking-wider"
                 >
                   {col.label}
                   {sortField === col.key && (
-                    <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
+                    <span className="ml-1 text-blue-primary">{sortDir === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </th>
               ))}
@@ -82,7 +82,7 @@ export default function VisitorLog({ filters }) {
           <tbody>
             {loading ? (
               Array.from({ length: 10 }).map((_, i) => (
-                <tr key={i} className="border-b border-gray-800/50">
+                <tr key={i} className="border-b border-cream-200/50">
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3">
                       <div className="skeleton h-4 rounded w-20" />
@@ -92,20 +92,20 @@ export default function VisitorLog({ filters }) {
               ))
             ) : sorted.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center text-gray-500">
+                <td colSpan={columns.length} className="px-4 py-12 text-center text-text-light italic">
                   No events found
                 </td>
               </tr>
             ) : (
               sorted.map((evt) => (
-                <tr key={evt.id} className="border-b border-gray-800/50 hover:bg-dark-800 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-gray-400">{evt.visitor_id?.slice(0, 8)}</td>
-                  <td className="px-4 py-3 text-gray-200 max-w-[200px] truncate">{evt.page_url}</td>
-                  <td className="px-4 py-3 text-gray-300">{evt.city && evt.country ? `${evt.city}, ${evt.country}` : 'Unknown'}</td>
-                  <td className="px-4 py-3 text-gray-400 capitalize">{evt.device}</td>
-                  <td className="px-4 py-3 text-gray-400">{evt.browser}</td>
-                  <td className="px-4 py-3 text-gray-400">{formatDuration(evt.duration_seconds)}</td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatTime(evt.created_at)}</td>
+                <tr key={evt.id} className="border-b border-cream-200/50 hover:bg-cream-100/50 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-text-light">{evt.visitor_id?.slice(0, 8)}</td>
+                  <td className="px-4 py-3 text-text-primary max-w-[200px] truncate">{evt.page_url}</td>
+                  <td className="px-4 py-3 text-text-secondary">{evt.city && evt.country ? `${evt.city}, ${evt.country}` : 'Unknown'}</td>
+                  <td className="px-4 py-3 text-text-secondary capitalize">{evt.device}</td>
+                  <td className="px-4 py-3 text-text-secondary">{evt.browser}</td>
+                  <td className="px-4 py-3 text-text-secondary">{formatDuration(evt.duration_seconds)}</td>
+                  <td className="px-4 py-3 text-text-light whitespace-nowrap">{formatTime(evt.created_at)}</td>
                 </tr>
               ))
             )}
@@ -113,24 +113,23 @@ export default function VisitorLog({ filters }) {
         </table>
       </div>
 
-      {/* Pagination */}
       {pagination.pages > 1 && (
-        <div className="p-4 border-t border-gray-800 flex items-center justify-between">
-          <span className="text-sm text-gray-500">
+        <div className="p-4 border-t border-cream-200 flex items-center justify-between">
+          <span className="text-sm text-text-light">
             Page {pagination.page} of {pagination.pages}
           </span>
           <div className="flex gap-2">
             <button
               disabled={pagination.page <= 1}
               onClick={() => fetchEvents(pagination.page - 1)}
-              className="px-3 py-1.5 text-sm bg-dark-800 rounded-lg border border-gray-700 disabled:opacity-40 hover:bg-dark-700 transition-colors"
+              className="px-3 py-1.5 text-sm bg-cream-100 rounded-lg border border-cream-300 disabled:opacity-40 hover:bg-cream-200 transition-colors text-text-secondary"
             >
               Previous
             </button>
             <button
               disabled={pagination.page >= pagination.pages}
               onClick={() => fetchEvents(pagination.page + 1)}
-              className="px-3 py-1.5 text-sm bg-dark-800 rounded-lg border border-gray-700 disabled:opacity-40 hover:bg-dark-700 transition-colors"
+              className="px-3 py-1.5 text-sm bg-cream-100 rounded-lg border border-cream-300 disabled:opacity-40 hover:bg-cream-200 transition-colors text-text-secondary"
             >
               Next
             </button>
