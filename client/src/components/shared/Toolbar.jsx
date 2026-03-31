@@ -1,10 +1,15 @@
-export default function Toolbar({ onSave, onPublish, onRevert, onUndo, onRedo, canUndo, canRedo, saving, publishing }) {
+export default function Toolbar({ onSave, onPublish, onRevert, onUndo, onRedo, canUndo, canRedo, saving, publishing, dirty }) {
   return (
     <div className="h-14 bg-dark-850 border-b border-gray-800 flex items-center px-4 gap-3 shrink-0">
-      <h2 className="text-sm font-semibold mr-4">Site Editor</h2>
+      <h2 className="text-sm font-semibold mr-2">Site Editor</h2>
+      {dirty && (
+        <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-500/15 text-amber-400 rounded-full border border-amber-500/20">
+          Unsaved changes
+        </span>
+      )}
 
       {/* Undo/Redo */}
-      <div className="flex gap-1">
+      <div className="flex gap-1 ml-2">
         <button
           onClick={onUndo}
           disabled={!canUndo}
@@ -43,7 +48,7 @@ export default function Toolbar({ onSave, onPublish, onRevert, onUndo, onRedo, c
         className="px-4 py-1.5 text-sm bg-dark-800 text-gray-200 border border-gray-700 rounded-lg hover:bg-dark-700 transition-colors disabled:opacity-50 flex items-center gap-2"
       >
         {saving && <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />}
-        Save Draft
+        Save to Repo
       </button>
 
       <button
@@ -52,7 +57,7 @@ export default function Toolbar({ onSave, onPublish, onRevert, onUndo, onRedo, c
         className="px-4 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50 flex items-center gap-2 font-medium"
       >
         {publishing && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-        Publish
+        Publish to Netlify
       </button>
     </div>
   );

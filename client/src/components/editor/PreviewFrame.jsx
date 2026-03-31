@@ -1,131 +1,108 @@
-import { useMemo } from 'react';
+import { useState } from 'react';
 
-export default function PreviewFrame({ config }) {
-  const html = useMemo(() => generatePreviewHTML(config), [config]);
+const SITE_URL = 'https://maison-melissa.netlify.app';
+
+const PAGES = [
+  { path: '/', label: 'Home' },
+  { path: '/homes/', label: 'Homes' },
+  { path: '/homes/le-moulin/', label: 'Le Moulin' },
+  { path: '/homes/la-grange/', label: 'La Grange' },
+  { path: '/homes/le-jardin/', label: 'Le Jardin' },
+  { path: '/the-compound/', label: 'Compound' },
+  { path: '/explore/', label: 'Explore' },
+  { path: '/catering/', label: 'Catering' },
+  { path: '/wellness/', label: 'Wellness' },
+  { path: '/about/', label: 'About' },
+  { path: '/contact/', label: 'Contact' },
+  { path: '/gallery/', label: 'Gallery' },
+  { path: '/journal/', label: 'Journal' },
+];
+
+export default function PreviewFrame() {
+  const [currentPage, setCurrentPage] = useState('/');
+  const [viewport, setViewport] = useState('desktop');
+
+  const widthClass = {
+    desktop: 'w-full',
+    tablet: 'w-[768px] mx-auto',
+    mobile: 'w-[375px] mx-auto',
+  };
 
   return (
     <div className="h-full flex flex-col">
+      {/* Browser Chrome */}
       <div className="h-10 bg-dark-850 border-b border-gray-800 flex items-center px-4 gap-2 shrink-0">
         <div className="flex gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-500/60" />
           <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
           <div className="w-3 h-3 rounded-full bg-green-500/60" />
         </div>
-        <div className="flex-1 mx-4">
-          <div className="bg-dark-900 rounded-md px-3 py-1 text-xs text-gray-500 text-center">
-            Live Preview
+
+        {/* Page selector */}
+        <select
+          value={currentPage}
+          onChange={(e) => setCurrentPage(e.target.value)}
+          className="ml-3 bg-dark-900 border border-gray-700 rounded-md px-2 py-1 text-xs text-gray-400 focus:outline-none focus:border-accent"
+        >
+          {PAGES.map((p) => (
+            <option key={p.path} value={p.path}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+
+        <div className="flex-1 mx-3">
+          <div className="bg-dark-900 rounded-md px-3 py-1 text-xs text-gray-500 text-center truncate">
+            {SITE_URL}{currentPage}
           </div>
         </div>
+
+        {/* Viewport toggles */}
+        <div className="flex gap-1 bg-dark-900 rounded-md p-0.5">
+          {[
+            { id: 'desktop', icon: 'M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z' },
+            { id: 'tablet', icon: 'M10.5 19.5h3m-6.75 2.25h10.5a2.25 2.25 0 002.25-2.25v-15a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25z' },
+            { id: 'mobile', icon: 'M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3' },
+          ].map(({ id, icon }) => (
+            <button
+              key={id}
+              onClick={() => setViewport(id)}
+              className={`p-1 rounded transition-colors ${
+                viewport === id ? 'text-accent' : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
+              </svg>
+            </button>
+          ))}
+        </div>
+
+        {/* Open in new tab */}
+        <a
+          href={`${SITE_URL}${currentPage}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
+          title="Open in new tab"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+        </a>
       </div>
-      <div className="flex-1 overflow-auto bg-white">
-        <iframe
-          srcDoc={html}
-          title="Site Preview"
-          className="w-full h-full border-0"
-          sandbox="allow-scripts"
-        />
+
+      {/* iframe */}
+      <div className="flex-1 overflow-auto bg-gray-100">
+        <div className={`h-full transition-all duration-300 ${widthClass[viewport]}`}>
+          <iframe
+            src={`${SITE_URL}${currentPage}`}
+            title="Site Preview"
+            className="w-full h-full border-0"
+            key={currentPage}
+          />
+        </div>
       </div>
     </div>
   );
-}
-
-function generatePreviewHTML(config) {
-  if (!config) return '<html><body><p>Loading...</p></body></html>';
-
-  const { colors, fonts, sections, images } = config;
-
-  const sectionsHTML = (sections || [])
-    .map((section) => {
-      switch (section.type) {
-        case 'hero':
-          return `
-            <section style="
-              background: ${section.background_color || colors.primary};
-              ${section.background_image ? `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${section.background_image}');` : ''}
-              background-size: cover; background-position: center;
-              min-height: 60vh; display: flex; align-items: center; justify-content: center;
-              text-align: center; padding: 4rem 2rem; color: white;
-            ">
-              <div>
-                <h1 style="font-family: ${fonts.heading.family}; font-size: ${fonts.heading.size}; font-weight: ${fonts.heading.weight}; margin-bottom: 1rem;">
-                  ${esc(section.headline || '')}
-                </h1>
-                <p style="font-family: ${fonts.body.family}; font-size: 1.25rem; opacity: 0.9; margin-bottom: 2rem;">
-                  ${esc(section.subheadline || '')}
-                </p>
-                ${section.cta_text ? `
-                  <a href="${esc(section.cta_link || '#')}" style="
-                    display: inline-block; background: ${colors.primary}; color: white;
-                    padding: 0.75rem 2rem; border-radius: 0.5rem; text-decoration: none;
-                    font-family: ${fonts.body.family}; font-weight: 600;
-                  ">${esc(section.cta_text)}</a>
-                ` : ''}
-              </div>
-            </section>`;
-
-        case 'about':
-          return `
-            <section style="background: ${section.background_color || '#fff'}; padding: 5rem 2rem;">
-              <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-                <h2 style="font-family: ${fonts.heading.family}; font-size: calc(${fonts.heading.size} * 0.8); font-weight: ${fonts.heading.weight}; color: ${fonts.heading.color}; margin-bottom: 1.5rem;">
-                  ${esc(section.headline || '')}
-                </h2>
-                <p style="font-family: ${fonts.body.family}; font-size: ${fonts.body.size}; color: ${fonts.body.color}; line-height: 1.8;">
-                  ${esc(section.body || '')}
-                </p>
-              </div>
-            </section>`;
-
-        case 'features':
-          return `
-            <section style="background: ${section.background_color || '#f8fafc'}; padding: 5rem 2rem;">
-              <div style="max-width: 1000px; margin: 0 auto;">
-                <h2 style="font-family: ${fonts.heading.family}; font-size: calc(${fonts.heading.size} * 0.8); font-weight: ${fonts.heading.weight}; color: ${fonts.heading.color}; text-align: center; margin-bottom: 3rem;">
-                  ${esc(section.headline || '')}
-                </h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                  ${(section.items || []).map((item) => `
-                    <div style="background: white; border-radius: 0.75rem; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                      <h3 style="font-family: ${fonts.heading.family}; font-weight: 600; font-size: 1.25rem; color: ${fonts.heading.color}; margin-bottom: 0.5rem;">
-                        ${esc(item.title || '')}
-                      </h3>
-                      <p style="font-family: ${fonts.body.family}; color: ${fonts.body.color}; font-size: 0.875rem; line-height: 1.6;">
-                        ${esc(item.description || '')}
-                      </p>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            </section>`;
-
-        case 'footer':
-          return `
-            <footer style="background: ${section.background_color || '#0f172a'}; color: #94a3b8; padding: 2rem; text-align: center;">
-              <p style="font-family: ${fonts.body.family}; font-size: 0.875rem;">${esc(section.text || '')}</p>
-            </footer>`;
-
-        default:
-          return '';
-      }
-    })
-    .join('');
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=${fonts.heading.family.replace(/\s/g, '+')}:wght@300;400;500;600;700;800&family=${fonts.body.family.replace(/\s/g, '+')}:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: ${fonts.body.family}, sans-serif; color: ${colors.text}; background: ${colors.background}; }
-    img { max-width: 100%; }
-  </style>
-</head>
-<body>${sectionsHTML}</body>
-</html>`;
-}
-
-function esc(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

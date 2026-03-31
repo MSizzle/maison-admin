@@ -11,6 +11,7 @@ const UAParser = require('ua-parser-js');
 const { initDB, queries } = require('./db');
 const { resolveIP } = require('./geo');
 const { deploy } = require('./deploy');
+const moulin = require('./moulin');
 
 const app = express();
 const server = http.createServer(app);
@@ -260,64 +261,72 @@ app.get('/api/analytics/locations', (req, res) => {
   res.json(queries.getVisitorLocations({ start, end }));
 });
 
-// ─── Site Config API ─────────────────────────────────────────────
+// ─── Moulin Site Editor API ──────────────────────────────────────
 
+// Get full site config (colors, fonts, translations, images, sections)
+app.get('/api/site', (req, res) => {
+  try {
+    const config = moulin.readSiteConfig();
+    const sections = moulin.getPageSections();
+    res.json({ ...config, sections });
+  } catch (err) {
+    console.error('[Site] Read error:', err);
+    res.status(500).json({ error: 'Failed to read site config: ' + err.message });
+  }
+});
+
+// Get page sections list
+app.get('/api/site/sections', (req, res) => {
+  res.json(moulin.getPageSections());
+});
+
+// Update CSS color variables
+app.put('/api/site/colors', (req, res) => {
+  try {
+    moulin.updateColors(req.body);
+    res.json({ ok: true, message: 'Colors updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update colors' });
+  }
+});
+
+// Update translations (partial — only send changed keys)
+app.put('/api/site/translations', (req, res) => {
+  try {
+    moulin.updateTranslations(req.body);
+    res.json({ ok: true, message: 'Translations updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update translations' });
+  }
+});
+
+// Publish: git commit + push the Moulin repo → triggers Netlify deploy
+app.post('/api/site/publish', async (req, res) => {
+  try {
+    const result = await deploy();
+    res.json({ ok: true, message: 'Published to Netlify', deploy: result });
+  } catch (err) {
+    res.status(500).json({ error: 'Deploy failed: ' + err.message });
+  }
+});
+
+// Legacy config endpoints (kept for backwards compat)
 app.get('/api/config', (req, res) => {
-  const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-  res.json(config);
-});
-
-app.get('/api/config/draft', (req, res) => {
-  const draft = JSON.parse(fs.readFileSync(draftPath, 'utf-8'));
-  res.json(draft);
-});
-
-app.put('/api/config/draft', (req, res) => {
   try {
-    fs.writeFileSync(draftPath, JSON.stringify(req.body, null, 2));
-    res.json({ ok: true, message: 'Draft saved' });
+    const config = moulin.readSiteConfig();
+    res.json(config);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to save draft' });
-  }
-});
-
-app.post('/api/config/publish', async (req, res) => {
-  try {
-    const draft = JSON.parse(fs.readFileSync(draftPath, 'utf-8'));
-    fs.writeFileSync(configPath, JSON.stringify(draft, null, 2));
-
-    let deployResult = null;
-    if (process.env.DEPLOY_REPO_PATH) {
-      const deployConfigPath = path.join(process.env.DEPLOY_REPO_PATH, 'site-config.json');
-      fs.writeFileSync(deployConfigPath, JSON.stringify(draft, null, 2));
-
-      try {
-        deployResult = await deploy();
-      } catch (err) {
-        return res.json({ ok: true, message: 'Published locally, but deploy failed', deployError: err.message });
-      }
-    }
-
-    res.json({ ok: true, message: 'Published successfully', deploy: deployResult ? 'success' : 'skipped' });
-  } catch (err) {
-    res.status(500).json({ error: 'Publish failed: ' + err.message });
-  }
-});
-
-app.post('/api/config/revert', (req, res) => {
-  try {
-    const published = fs.readFileSync(configPath, 'utf-8');
-    fs.writeFileSync(draftPath, published);
-    res.json({ ok: true, config: JSON.parse(published) });
-  } catch (err) {
-    res.status(500).json({ error: 'Revert failed' });
+    res.status(500).json({ error: err.message });
   }
 });
 
 // ─── Image Upload ────────────────────────────────────────────────
 
+// Upload to Moulin repo images if available, otherwise local
+const siteImagesDir = fs.existsSync(moulin.PATHS.images()) ? moulin.PATHS.images() : IMAGES_DIR;
+
 const storage = multer.diskStorage({
-  destination: IMAGES_DIR,
+  destination: siteImagesDir,
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');

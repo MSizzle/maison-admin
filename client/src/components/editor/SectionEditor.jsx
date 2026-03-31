@@ -1,182 +1,145 @@
-import ColorPicker from './ColorPicker';
-import FontControls from './FontControls';
-import ImageUploader from './ImageUploader';
+import { useState } from 'react';
 
-export default function SectionEditor({ config, activeSection, onUpdate }) {
-  if (!activeSection) return <p className="text-gray-500 text-sm">Select a section to edit</p>;
+const SECTION_INFO = {
+  home: { title: 'Homepage', description: 'Hero, intro text, home features, and CTAs' },
+  nav: { title: 'Navigation', description: 'Top nav links and mobile menu labels' },
+  homes: { title: 'Homes Overview', description: 'The homes listing page intro and cards' },
+  moulin: { title: 'Le Moulin', description: 'Le Moulin property page — all copy' },
+  grange: { title: 'La Grange', description: 'La Grange property page — all copy' },
+  jardin: { title: 'Le Jardin', description: 'Le Jardin property page — all copy' },
+  compound: { title: 'The Compound', description: 'Compound overview page — features, amenities, stats' },
+  explore: { title: 'Explore', description: 'Things to do page — activities, excursions' },
+  catering: { title: 'Catering', description: 'Catering & private chef page' },
+  wellness: { title: 'Wellness', description: 'Spa, yoga, and wellness offerings' },
+  about: { title: 'About', description: 'About the property and owners' },
+  contact: { title: 'Contact', description: 'Contact form labels and info' },
+  gallery: { title: 'Gallery', description: 'Photo gallery page' },
+  footer: { title: 'Footer', description: 'Footer links, tagline, newsletter' },
+  amenity: { title: 'Amenities', description: 'Amenity icons and descriptions' },
+  success: { title: 'Success Page', description: 'Form submission confirmation' },
+};
 
-  // Global styles editor
-  if (activeSection === '_global') {
-    return (
-      <div className="space-y-6">
-        <h3 className="text-sm font-semibold text-gray-200">Global Colors</h3>
-        {Object.entries(config.colors || {}).map(([key, value]) => (
-          <div key={key}>
-            <label className="block text-xs text-gray-400 mb-1.5 capitalize">{key}</label>
-            <ColorPicker
-              color={value}
-              onChange={(c) =>
-                onUpdate((prev) => ({ ...prev, colors: { ...prev.colors, [key]: c } }))
-              }
-            />
-          </div>
-        ))}
+export default function SectionEditor({ sectionId, translations, onUpdate }) {
+  const [filter, setFilter] = useState('');
+  const [editingLang, setEditingLang] = useState('en');
+  const info = SECTION_INFO[sectionId] || { title: sectionId, description: '' };
 
-        <hr className="border-gray-800" />
-        <h3 className="text-sm font-semibold text-gray-200">Typography</h3>
+  const keys = Object.entries(translations).filter(([key]) =>
+    filter ? key.toLowerCase().includes(filter.toLowerCase()) : true
+  );
 
-        <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Heading Font</label>
-          <FontControls
-            font={config.fonts?.heading}
-            onChange={(f) =>
-              onUpdate((prev) => ({ ...prev, fonts: { ...prev.fonts, heading: f } }))
-            }
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Body Font</label>
-          <FontControls
-            font={config.fonts?.body}
-            onChange={(f) =>
-              onUpdate((prev) => ({ ...prev, fonts: { ...prev.fonts, body: f } }))
-            }
-          />
-        </div>
-
-        <hr className="border-gray-800" />
-        <h3 className="text-sm font-semibold text-gray-200">Images</h3>
-        {Object.entries(config.images || {}).map(([key, value]) => (
-          <div key={key}>
-            <label className="block text-xs text-gray-400 mb-1.5 capitalize">{key.replace(/_/g, ' ')}</label>
-            <ImageUploader
-              currentImage={value}
-              onUpload={(path) =>
-                onUpdate((prev) => ({ ...prev, images: { ...prev.images, [key]: path } }))
-              }
-            />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // Section-specific editor
-  const sectionIndex = config.sections?.findIndex((s) => s.id === activeSection);
-  const section = config.sections?.[sectionIndex];
-  if (!section) return <p className="text-gray-500 text-sm">Section not found</p>;
-
-  function updateField(field, value) {
-    onUpdate((prev) => {
-      const sections = [...prev.sections];
-      sections[sectionIndex] = { ...sections[sectionIndex], [field]: value };
-      return { ...prev, sections };
-    });
-  }
-
-  function updateItem(itemIndex, field, value) {
-    onUpdate((prev) => {
-      const sections = [...prev.sections];
-      const items = [...(sections[sectionIndex].items || [])];
-      items[itemIndex] = { ...items[itemIndex], [field]: value };
-      sections[sectionIndex] = { ...sections[sectionIndex], items };
-      return { ...prev, sections };
+  function updateTranslation(key, lang, value) {
+    onUpdate({
+      ...translations,
+      [key]: { ...translations[key], [lang]: value },
     });
   }
 
   return (
-    <div className="space-y-5">
-      <h3 className="text-sm font-semibold text-gray-200 capitalize">{section.type} Section</h3>
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-semibold text-gray-200">{info.title}</h3>
+        <p className="text-xs text-gray-500 mt-0.5">{info.description}</p>
+        <p className="text-[10px] text-gray-600 mt-1">{keys.length} translation keys</p>
+      </div>
 
-      {/* Text fields */}
-      {section.headline !== undefined && (
-        <Field label="Headline" value={section.headline} onChange={(v) => updateField('headline', v)} />
-      )}
-      {section.subheadline !== undefined && (
-        <Field label="Subheadline" value={section.subheadline} onChange={(v) => updateField('subheadline', v)} />
-      )}
-      {section.body !== undefined && (
-        <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Body Text</label>
-          <textarea
-            value={section.body}
-            onChange={(e) => updateField('body', e.target.value)}
-            rows={4}
-            className="w-full bg-dark-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:border-accent focus:outline-none resize-none"
-          />
+      {/* Controls */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Filter keys..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="flex-1 bg-dark-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 placeholder-gray-600 focus:border-accent focus:outline-none"
+        />
+        <div className="flex gap-0.5 bg-dark-800 rounded-lg p-0.5 border border-gray-700">
+          <button
+            onClick={() => setEditingLang('en')}
+            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
+              editingLang === 'en' ? 'bg-accent text-white' : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            EN
+          </button>
+          <button
+            onClick={() => setEditingLang('fr')}
+            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
+              editingLang === 'fr' ? 'bg-accent text-white' : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            FR
+          </button>
+          <button
+            onClick={() => setEditingLang('both')}
+            className={`px-3 py-1 text-xs rounded-md transition-colors font-medium ${
+              editingLang === 'both' ? 'bg-accent text-white' : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            Both
+          </button>
         </div>
-      )}
-      {section.cta_text !== undefined && (
-        <Field label="Button Text" value={section.cta_text} onChange={(v) => updateField('cta_text', v)} />
-      )}
-      {section.cta_link !== undefined && (
-        <Field label="Button Link" value={section.cta_link} onChange={(v) => updateField('cta_link', v)} />
-      )}
-      {section.text !== undefined && (
-        <Field label="Text" value={section.text} onChange={(v) => updateField('text', v)} />
-      )}
+      </div>
 
-      {/* Background color */}
-      {section.background_color !== undefined && (
-        <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Background Color</label>
-          <ColorPicker
-            color={section.background_color}
-            onChange={(c) => updateField('background_color', c)}
-          />
-        </div>
-      )}
-
-      {/* Background image */}
-      {section.background_image !== undefined && (
-        <div>
-          <label className="block text-xs text-gray-400 mb-1.5">Background Image</label>
-          <ImageUploader
-            currentImage={section.background_image}
-            onUpload={(path) => updateField('background_image', path)}
-          />
-        </div>
-      )}
-
-      {/* Items (features, etc.) */}
-      {section.items && (
-        <div>
-          <label className="block text-xs text-gray-400 mb-2">Items</label>
-          <div className="space-y-3">
-            {section.items.map((item, i) => (
-              <div key={i} className="bg-dark-800 rounded-lg p-3 space-y-2">
-                <Field
-                  label="Title"
-                  value={item.title || ''}
-                  onChange={(v) => updateItem(i, 'title', v)}
-                  small
-                />
-                <Field
-                  label="Description"
-                  value={item.description || ''}
-                  onChange={(v) => updateItem(i, 'description', v)}
-                  small
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Translation entries */}
+      <div className="space-y-2">
+        {keys.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center py-8">No translations found</p>
+        ) : (
+          keys.map(([key, value]) => (
+            <TranslationField
+              key={key}
+              translationKey={key}
+              value={value}
+              editingLang={editingLang}
+              onUpdate={(lang, val) => updateTranslation(key, lang, val)}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }
 
-function Field({ label, value, onChange, small }) {
+function TranslationField({ translationKey, value, editingLang, onUpdate }) {
+  const shortKey = translationKey.split('.').slice(1).join('.');
+  const isLong = (value.en?.length || 0) > 80 || (value.fr?.length || 0) > 80;
+  const InputTag = isLong ? 'textarea' : 'input';
+  const inputProps = isLong ? { rows: 3 } : { type: 'text' };
+
   return (
-    <div>
-      <label className={`block text-gray-400 mb-1 ${small ? 'text-[10px]' : 'text-xs'}`}>{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-dark-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:border-accent focus:outline-none"
-      />
+    <div className="bg-dark-800 rounded-lg p-3 group">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-[10px] font-mono text-gray-600 truncate">{shortKey}</span>
+      </div>
+
+      {(editingLang === 'en' || editingLang === 'both') && (
+        <div className="mb-2">
+          {editingLang === 'both' && (
+            <label className="block text-[10px] text-gray-500 mb-0.5 font-medium">English</label>
+          )}
+          <InputTag
+            {...inputProps}
+            value={value.en || ''}
+            onChange={(e) => onUpdate('en', e.target.value)}
+            className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:border-accent focus:outline-none resize-none"
+          />
+        </div>
+      )}
+
+      {(editingLang === 'fr' || editingLang === 'both') && (
+        <div>
+          {editingLang === 'both' && (
+            <label className="block text-[10px] text-gray-500 mb-0.5 font-medium">Français</label>
+          )}
+          <InputTag
+            {...inputProps}
+            value={value.fr || ''}
+            onChange={(e) => onUpdate('fr', e.target.value)}
+            className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-200 focus:border-accent focus:outline-none resize-none italic"
+            placeholder={editingLang === 'both' ? 'French translation...' : undefined}
+          />
+        </div>
+      )}
     </div>
   );
 }
