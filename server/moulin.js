@@ -1,21 +1,30 @@
 /**
  * Moulin à Rêves site integration
  * Reads/writes the actual Astro site files: CSS variables, translations, images
+ * Works locally (filesystem) or remotely (GitHub API)
  */
 const fs = require('fs');
 const path = require('path');
+const github = require('./github');
+
+const CSS_PATH = 'src/styles/global.css';
+const TRANSLATIONS_PATH = 'public/i18n/translations.json';
 
 function getRepoPath() {
   return process.env.DEPLOY_REPO_PATH || path.join(__dirname, '..', '..', 'moulin-a-reves');
 }
 
 const PATHS = {
-  css: () => path.join(getRepoPath(), 'src', 'styles', 'global.css'),
-  translations: () => path.join(getRepoPath(), 'public', 'i18n', 'translations.json'),
+  css: () => path.join(getRepoPath(), CSS_PATH),
+  translations: () => path.join(getRepoPath(), TRANSLATIONS_PATH),
   images: () => path.join(getRepoPath(), 'public', 'images'),
 };
 
-// ─── CSS Variable Extraction ─────────────────────────────────────
+function isLocalRepoAvailable() {
+  return fs.existsSync(PATHS.css()) && fs.existsSync(PATHS.translations());
+}
+
+// ─── CSS Variable Parsing ────────────────────────────────────────
 
 function parseCSSVariables(cssContent) {
   const rootMatch = cssContent.match(/:root\s*\{([^}]+)\}/s);
@@ -31,15 +40,11 @@ function parseCSSVariables(cssContent) {
       currentGroup = commentMatch[1].toLowerCase().replace(/\s+/g, '_');
       continue;
     }
-
     const varMatch = line.match(/--([^:]+):\s*([^;]+);/);
     if (varMatch) {
-      const name = varMatch[1].trim();
-      const value = varMatch[2].trim();
-      vars[name] = { value, group: currentGroup };
+      vars[varMatch[1].trim()] = { value: varMatch[2].trim(), group: currentGroup };
     }
   }
-
   return vars;
 }
 
@@ -52,32 +57,15 @@ function writeCSSVariables(cssContent, updates) {
   return updated;
 }
 
-// ─── Read site config from actual files ──────────────────────────
-
-function isRepoAvailable() {
-  return fs.existsSync(PATHS.css()) && fs.existsSync(PATHS.translations());
-}
-
-function readSiteConfig() {
-  if (!isRepoAvailable()) {
-    return { colors: {}, fonts: {}, spacing: {}, pages: {}, images: [], available: false };
-  }
-
-  const repoPath = getRepoPath();
-
-  // Read CSS
-  const cssContent = fs.readFileSync(PATHS.css(), 'utf-8');
+function organizeConfig(cssContent, translationsContent) {
   const cssVars = parseCSSVariables(cssContent);
+  const translations = JSON.parse(translationsContent);
 
-  // Read translations
-  const translations = JSON.parse(fs.readFileSync(PATHS.translations(), 'utf-8'));
-
-  // Organize CSS vars into groups
   const colors = {};
   const fonts = {};
   const spacing = {};
 
-  for (const [name, { value, group }] of Object.entries(cssVars)) {
+  for (const [name, { value }] of Object.entries(cssVars)) {
     if (name.startsWith('bg-') || name.startsWith('blue-') || name.startsWith('text-') ||
         name === 'gold' || name === 'green-garden' || name === 'terracotta') {
       colors[name] = value;
@@ -88,7 +76,6 @@ function readSiteConfig() {
     }
   }
 
-  // Organize translations by page/section
   const pages = {};
   for (const [key, value] of Object.entries(translations)) {
     const prefix = key.split('.')[0];
@@ -96,14 +83,139 @@ function readSiteConfig() {
     pages[prefix][key] = value;
   }
 
-  // List images
-  const imagesDir = PATHS.images();
-  let images = [];
-  if (fs.existsSync(imagesDir)) {
-    images = listImagesRecursive(imagesDir, imagesDir);
+  return { colors, fonts, spacing, pages };
+}
+
+// ─── Read (local or GitHub) ──────────────────────────────────────
+
+async function readSiteConfig() {
+  // Try local filesystem first
+  if (isLocalRepoAvailable()) {
+    const cssContent = fs.readFileSync(PATHS.css(), 'utf-8');
+    const translationsContent = fs.readFileSync(PATHS.translations(), 'utf-8');
+    const config = organizeConfig(cssContent, translationsContent);
+
+    let images = [];
+    const imagesDir = PATHS.images();
+    if (fs.existsSync(imagesDir)) {
+      images = listImagesRecursive(imagesDir, imagesDir);
+    }
+
+    return { ...config, images, available: true, source: 'local' };
   }
 
-  return { colors, fonts, spacing, pages, images, available: true };
+  // Fall back to GitHub API
+  if (github.isAvailable()) {
+    try {
+      const [cssFile, transFile] = await Promise.all([
+        github.readFile(CSS_PATH),
+        github.readFile(TRANSLATIONS_PATH),
+      ]);
+      const config = organizeConfig(cssFile.content, transFile.content);
+      return { ...config, images: [], available: true, source: 'github' };
+    } catch (err) {
+      console.error('[Moulin] GitHub read error:', err.message);
+      return { colors: {}, fonts: {}, spacing: {}, pages: {}, images: [], available: false, error: err.message };
+    }
+  }
+
+  return { colors: {}, fonts: {}, spacing: {}, pages: {}, images: [], available: false };
+}
+
+// ─── Write (local or GitHub) ─────────────────────────────────────
+
+async function updateColors(colorUpdates) {
+  if (isLocalRepoAvailable()) {
+    const cssPath = PATHS.css();
+    let css = fs.readFileSync(cssPath, 'utf-8');
+    css = writeCSSVariables(css, colorUpdates);
+    fs.writeFileSync(cssPath, css);
+    return;
+  }
+
+  if (github.isAvailable()) {
+    const { content: css } = await github.readFile(CSS_PATH);
+    const updated = writeCSSVariables(css, colorUpdates);
+    await github.writeFile(CSS_PATH, updated, 'Update colors via Maison Admin');
+    return;
+  }
+
+  throw new Error('No repo access — local repo not found and GitHub token not configured');
+}
+
+async function updateTranslations(translationUpdates) {
+  if (isLocalRepoAvailable()) {
+    const transPath = PATHS.translations();
+    const translations = JSON.parse(fs.readFileSync(transPath, 'utf-8'));
+    applyTranslationUpdates(translations, translationUpdates);
+    fs.writeFileSync(transPath, JSON.stringify(translations, null, 2));
+    return;
+  }
+
+  if (github.isAvailable()) {
+    const { content } = await github.readFile(TRANSLATIONS_PATH);
+    const translations = JSON.parse(content);
+    applyTranslationUpdates(translations, translationUpdates);
+    await github.writeFile(TRANSLATIONS_PATH, JSON.stringify(translations, null, 2), 'Update translations via Maison Admin');
+    return;
+  }
+
+  throw new Error('No repo access — local repo not found and GitHub token not configured');
+}
+
+// Save both colors and translations in a single commit (GitHub only)
+async function saveAll(colorUpdates, translationUpdates) {
+  if (isLocalRepoAvailable()) {
+    // Local: just write both files
+    if (colorUpdates && Object.keys(colorUpdates).length) {
+      const cssPath = PATHS.css();
+      let css = fs.readFileSync(cssPath, 'utf-8');
+      css = writeCSSVariables(css, colorUpdates);
+      fs.writeFileSync(cssPath, css);
+    }
+    if (translationUpdates && Object.keys(translationUpdates).length) {
+      const transPath = PATHS.translations();
+      const translations = JSON.parse(fs.readFileSync(transPath, 'utf-8'));
+      applyTranslationUpdates(translations, translationUpdates);
+      fs.writeFileSync(transPath, JSON.stringify(translations, null, 2));
+    }
+    return { source: 'local' };
+  }
+
+  if (github.isAvailable()) {
+    const files = [];
+
+    if (colorUpdates && Object.keys(colorUpdates).length) {
+      const { content: css } = await github.readFile(CSS_PATH);
+      files.push({ path: CSS_PATH, content: writeCSSVariables(css, colorUpdates) });
+    }
+
+    if (translationUpdates && Object.keys(translationUpdates).length) {
+      const { content } = await github.readFile(TRANSLATIONS_PATH);
+      const translations = JSON.parse(content);
+      applyTranslationUpdates(translations, translationUpdates);
+      files.push({ path: TRANSLATIONS_PATH, content: JSON.stringify(translations, null, 2) });
+    }
+
+    if (files.length > 0) {
+      await github.writeFiles(files, 'Site update via Maison Admin');
+    }
+
+    return { source: 'github' };
+  }
+
+  throw new Error('No repo access');
+}
+
+function applyTranslationUpdates(translations, updates) {
+  for (const [key, value] of Object.entries(updates)) {
+    if (translations[key]) {
+      if (value.en !== undefined) translations[key].en = value.en;
+      if (value.fr !== undefined) translations[key].fr = value.fr;
+    } else {
+      translations[key] = value;
+    }
+  }
 }
 
 function listImagesRecursive(dir, baseDir) {
@@ -115,39 +227,10 @@ function listImagesRecursive(dir, baseDir) {
     } else if (/\.(webp|jpg|jpeg|png|gif|svg)$/i.test(entry.name)) {
       const relativePath = '/' + path.relative(baseDir, fullPath).replace(/\\/g, '/');
       const stats = fs.statSync(fullPath);
-      results.push({
-        path: `/images${relativePath}`,
-        name: entry.name,
-        size: stats.size,
-      });
+      results.push({ path: `/images${relativePath}`, name: entry.name, size: stats.size });
     }
   }
   return results;
-}
-
-// ─── Write updates back to site files ────────────────────────────
-
-function updateColors(colorUpdates) {
-  const cssPath = PATHS.css();
-  let css = fs.readFileSync(cssPath, 'utf-8');
-  css = writeCSSVariables(css, colorUpdates);
-  fs.writeFileSync(cssPath, css);
-}
-
-function updateTranslations(translationUpdates) {
-  const transPath = PATHS.translations();
-  const translations = JSON.parse(fs.readFileSync(transPath, 'utf-8'));
-
-  for (const [key, value] of Object.entries(translationUpdates)) {
-    if (translations[key]) {
-      if (value.en !== undefined) translations[key].en = value.en;
-      if (value.fr !== undefined) translations[key].fr = value.fr;
-    } else {
-      translations[key] = value;
-    }
-  }
-
-  fs.writeFileSync(transPath, JSON.stringify(translations, null, 2));
 }
 
 function getPageSections() {
@@ -175,7 +258,9 @@ module.exports = {
   readSiteConfig,
   updateColors,
   updateTranslations,
+  saveAll,
   getPageSections,
   PATHS,
   getRepoPath,
+  isLocalRepoAvailable,
 };

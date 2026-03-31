@@ -77,28 +77,22 @@ export default function EditorPanel() {
     if (!siteData) return;
     setSaving(true);
     try {
-      const results = await Promise.all([
-        fetch('/api/site/colors', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(siteData.colors),
-        }),
-        fetch('/api/site/translations', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(
-            Object.fromEntries(
-              Object.entries(siteData.pages).flatMap(([, keys]) => Object.entries(keys))
-            )
-          ),
-        }),
-      ]);
+      const allTranslations = Object.fromEntries(
+        Object.entries(siteData.pages).flatMap(([, keys]) => Object.entries(keys))
+      );
 
-      if (results.every((r) => r.ok)) {
-        toast.success('Changes saved to repo');
+      const res = await fetch('/api/site/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ colors: siteData.colors, translations: allTranslations }),
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        toast.success(data.source === 'github' ? 'Saved via GitHub' : 'Saved to repo');
         setDirty(false);
       } else {
-        toast.error('Some changes failed to save');
+        toast.error(data.error || 'Save failed');
       }
     } catch {
       toast.error('Save failed');
@@ -109,8 +103,15 @@ export default function EditorPanel() {
   const publish = async () => {
     setPublishing(true);
     try {
-      await save();
-      const res = await fetch('/api/site/publish', { method: 'POST' });
+      const allTranslations = Object.fromEntries(
+        Object.entries(siteData.pages).flatMap(([, keys]) => Object.entries(keys))
+      );
+
+      const res = await fetch('/api/site/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ colors: siteData.colors, translations: allTranslations }),
+      });
       const data = await res.json();
       if (data.ok) {
         toast.success('Published to Netlify!');

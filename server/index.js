@@ -266,10 +266,12 @@ app.get('/api/analytics/locations', (req, res) => {
 
 // ─── Moulin Site Editor API ──────────────────────────────────────
 
+const github = require('./github');
+
 // Get full site config (colors, fonts, translations, images, sections)
-app.get('/api/site', (req, res) => {
+app.get('/api/site', async (req, res) => {
   try {
-    const config = moulin.readSiteConfig();
+    const config = await moulin.readSiteConfig();
     const sections = moulin.getPageSections();
     res.json({ ...config, sections });
   } catch (err) {
@@ -284,39 +286,60 @@ app.get('/api/site/sections', (req, res) => {
 });
 
 // Update CSS color variables
-app.put('/api/site/colors', (req, res) => {
+app.put('/api/site/colors', async (req, res) => {
   try {
-    moulin.updateColors(req.body);
+    await moulin.updateColors(req.body);
     res.json({ ok: true, message: 'Colors updated' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update colors' });
+    res.status(500).json({ error: 'Failed to update colors: ' + err.message });
   }
 });
 
 // Update translations (partial — only send changed keys)
-app.put('/api/site/translations', (req, res) => {
+app.put('/api/site/translations', async (req, res) => {
   try {
-    moulin.updateTranslations(req.body);
+    await moulin.updateTranslations(req.body);
     res.json({ ok: true, message: 'Translations updated' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update translations' });
+    res.status(500).json({ error: 'Failed to update translations: ' + err.message });
   }
 });
 
-// Publish: git commit + push the Moulin repo → triggers Netlify deploy
+// Save all changes (colors + translations) in one commit
+app.post('/api/site/save', async (req, res) => {
+  try {
+    const { colors, translations } = req.body;
+    const result = await moulin.saveAll(colors, translations);
+    res.json({ ok: true, message: 'Saved', ...result });
+  } catch (err) {
+    res.status(500).json({ error: 'Save failed: ' + err.message });
+  }
+});
+
+// Publish: for local, git commit + push. For GitHub, changes are already committed.
 app.post('/api/site/publish', async (req, res) => {
   try {
-    const result = await deploy();
-    res.json({ ok: true, message: 'Published to Netlify', deploy: result });
+    // If using GitHub API, save first (which commits directly), then Netlify auto-deploys
+    if (!moulin.isLocalRepoAvailable() && github.isAvailable()) {
+      const { colors, translations } = req.body || {};
+      if (colors || translations) {
+        await moulin.saveAll(colors, translations);
+      }
+      res.json({ ok: true, message: 'Published to Netlify via GitHub commit', source: 'github' });
+    } else {
+      // Local: git commit + push
+      const result = await deploy();
+      res.json({ ok: true, message: 'Published to Netlify', deploy: result, source: 'local' });
+    }
   } catch (err) {
     res.status(500).json({ error: 'Deploy failed: ' + err.message });
   }
 });
 
-// Legacy config endpoints (kept for backwards compat)
-app.get('/api/config', (req, res) => {
+// Legacy config endpoints
+app.get('/api/config', async (req, res) => {
   try {
-    const config = moulin.readSiteConfig();
+    const config = await moulin.readSiteConfig();
     res.json(config);
   } catch (err) {
     res.status(500).json({ error: err.message });
