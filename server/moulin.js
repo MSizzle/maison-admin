@@ -54,7 +54,15 @@ function writeCSSVariables(cssContent, updates) {
 
 // ─── Read site config from actual files ──────────────────────────
 
+function isRepoAvailable() {
+  return fs.existsSync(PATHS.css()) && fs.existsSync(PATHS.translations());
+}
+
 function readSiteConfig() {
+  if (!isRepoAvailable()) {
+    return { colors: {}, fonts: {}, spacing: {}, pages: {}, images: [], available: false };
+  }
+
   const repoPath = getRepoPath();
 
   // Read CSS
@@ -95,7 +103,7 @@ function readSiteConfig() {
     images = listImagesRecursive(imagesDir, imagesDir);
   }
 
-  return { colors, fonts, spacing, pages, images };
+  return { colors, fonts, spacing, pages, images, available: true };
 }
 
 function listImagesRecursive(dir, baseDir) {

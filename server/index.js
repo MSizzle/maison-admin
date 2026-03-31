@@ -101,6 +101,9 @@ if (isProduction) {
   app.use('/api', cors({ origin: ['http://localhost:5174', 'http://127.0.0.1:5174'] }));
 }
 
+// Healthcheck
+app.get('/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+
 // Serve static images
 app.use('/images', express.static(IMAGES_DIR));
 
