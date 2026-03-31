@@ -33,7 +33,7 @@ export default function AnalyticsDashboard() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold text-text-primary">Analytics</h1>
+          <h1 className="font-display text-3xl font-bold text-text-primary">Analytics</h1>
           <p className="text-sm text-text-light mt-0.5">Visitor insights for Moulin à Rêves</p>
         </div>
         <div className="flex items-center gap-3">

@@ -57,7 +57,7 @@ export default function VisitorLog({ filters }) {
   return (
     <div className="bg-white rounded-xl border border-cream-300 overflow-hidden shadow-sm">
       <div className="p-5 border-b border-cream-200 flex items-center justify-between">
-        <h2 className="font-display text-xl font-semibold text-text-primary">Visitor Log</h2>
+        <h2 className="font-display text-xl font-bold text-text-primary">Visitor Log</h2>
         <span className="text-sm text-text-light">{pagination.total} total visits</span>
       </div>
 

@@ -3,6 +3,16 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-weight: 700;
+  }
+}
+
+@layer base {
   * {
     scrollbar-width: thin;
     scrollbar-color: #D4CBC0 transparent;

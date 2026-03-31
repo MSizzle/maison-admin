@@ -48,7 +48,7 @@ function Charts({ filters }) {
       {/* Traffic Over Time */}
       <div className="bg-white rounded-xl border border-cream-300 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-xl font-semibold text-text-primary">Traffic Over Time</h2>
+          <h2 className="font-display text-xl font-bold text-text-primary">Traffic Over Time</h2>
           <div className="flex gap-1 bg-cream-100 rounded-lg p-0.5 border border-cream-300">
             {['hour', 'day', 'week', 'month'].map((g) => (
               <button
@@ -89,7 +89,7 @@ function Charts({ filters }) {
 
       {/* Top Pages */}
       <div className="bg-white rounded-xl border border-cream-300 p-5 shadow-sm">
-        <h2 className="font-display text-xl font-semibold text-text-primary mb-4">Top Pages</h2>
+        <h2 className="font-display text-xl font-bold text-text-primary mb-4">Top Pages</h2>
         {loading ? (
           <div className="skeleton h-[250px] rounded-lg" />
         ) : topPages.length === 0 ? (
@@ -117,7 +117,7 @@ function Charts({ filters }) {
 
       {/* Geo Breakdown */}
       <div className="bg-white rounded-xl border border-cream-300 p-5 lg:col-span-2 shadow-sm">
-        <h2 className="font-display text-xl font-semibold text-text-primary mb-4">Geo Breakdown</h2>
+        <h2 className="font-display text-xl font-bold text-text-primary mb-4">Geo Breakdown</h2>
         {loading ? (
           <div className="skeleton h-[200px] rounded-lg" />
         ) : geo.length === 0 ? (

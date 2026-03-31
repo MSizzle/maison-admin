@@ -24,7 +24,7 @@ export default function LiveVisitors({ visitors }) {
           <div className="w-3 h-3 rounded-full bg-garden" />
           <div className="absolute inset-0 w-3 h-3 rounded-full bg-garden animate-ping opacity-75" />
         </div>
-        <h2 className="font-display text-xl font-semibold text-text-primary">Live Visitors</h2>
+        <h2 className="font-display text-xl font-bold text-text-primary">Live Visitors</h2>
         <span className="ml-auto text-3xl font-display font-bold text-blue-primary">{visitors.length}</span>
       </div>
 

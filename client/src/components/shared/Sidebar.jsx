@@ -27,7 +27,7 @@ export default function Sidebar({ activeTab, onTabChange }) {
           M
         </div>
         <div className="ml-3 hidden lg:block">
-          <span className="font-display text-base font-semibold text-text-primary">Moulin à Rêves</span>
+          <span className="font-display text-base font-bold text-text-primary">Moulin à Rêves</span>
           <p className="text-[10px] text-text-light -mt-0.5">Admin Dashboard</p>
         </div>
       </div>

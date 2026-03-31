@@ -1,7 +1,7 @@
 export default function Toolbar({ onSave, onPublish, onRevert, onUndo, onRedo, canUndo, canRedo, saving, publishing, dirty }) {
   return (
     <div className="h-14 bg-cream-50 border-b border-cream-300 flex items-center px-4 gap-3 shrink-0">
-      <h2 className="font-display text-lg font-semibold text-text-primary mr-2">Site Editor</h2>
+      <h2 className="font-display text-lg font-bold text-text-primary mr-2">Site Editor</h2>
       {dirty && (
         <span className="px-2 py-0.5 text-[10px] font-medium bg-gold/10 text-gold rounded-full border border-gold/20">
           Unsaved changes

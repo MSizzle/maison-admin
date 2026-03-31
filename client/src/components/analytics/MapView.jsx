@@ -24,7 +24,7 @@ function MapView({ filters }) {
 
   return (
     <div className="bg-white rounded-xl border border-cream-300 p-5 relative shadow-sm">
-      <h2 className="font-display text-xl font-semibold text-text-primary mb-4">Visitor Map</h2>
+      <h2 className="font-display text-xl font-bold text-text-primary mb-4">Visitor Map</h2>
 
       {loading ? (
         <div className="skeleton h-[400px] rounded-lg" />
