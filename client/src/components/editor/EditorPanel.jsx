@@ -187,21 +187,21 @@ export default function EditorPanel() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Section Tree + Editor */}
-        <div className="w-[440px] border-r border-surface-border bg-white flex flex-col overflow-hidden shrink-0">
+        <div className="w-[400px] border-r border-border bg-panel flex flex-col overflow-hidden shrink-0">
           {/* Section Tree */}
-          <div className="border-b border-surface-border p-3 overflow-y-auto max-h-[280px]">
-            <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2 px-2">
-              Moulin à Rêves
+          <div className="border-b border-border p-2.5 overflow-y-auto max-h-[280px]">
+            <h3 className="font-mono text-[9px] text-t4 tracking-widest mb-2 px-2">
+              SECTIONS
             </h3>
             <div className="space-y-0.5">
               <SectionButton
                 active={activeSection === '_colors'}
                 onClick={() => setActiveSection('_colors')}
                 icon="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"
-                label="Design System"
+                label="CSS vars"
               />
-              <div className="mt-2 mb-1 px-2">
-                <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Pages</p>
+              <div className="mt-1.5 mb-1 px-2">
+                <p className="font-mono text-[9px] text-t4 tracking-widest">PAGES</p>
               </div>
               {(siteData.sections || []).map((section) => (
                 <SectionButton
@@ -216,7 +216,7 @@ export default function EditorPanel() {
           </div>
 
           {/* Editor Area */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-3">
             {activeSection === '_colors' ? (
               <ColorEditor
                 colors={siteData.colors}
@@ -239,7 +239,7 @@ export default function EditorPanel() {
         </div>
 
         {/* Right: Live Preview */}
-        <div className="flex-1 overflow-hidden bg-surface-bg">
+        <div className="flex-1 overflow-hidden bg-bg">
           <PreviewFrame />
         </div>
       </div>
@@ -249,20 +249,19 @@ export default function EditorPanel() {
 
 function SectionButton({ active, onClick, icon, label, count }) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
-        active ? 'bg-blue-50 text-blue-primary font-semibold' : 'text-text-secondary hover:text-text-primary hover:bg-surface-raised'
-      }`}
-    >
-      {icon && (
-        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <button onClick={onClick}
+      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-xs transition-colors ${
+        active ? 'bg-accent/15 text-accent font-semibold' : 'text-t3 hover:text-t2 hover:bg-hover'
+      }`}>
+      {icon ? (
+        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
         </svg>
+      ) : (
+        <span className="w-3.5 h-3.5 shrink-0 rounded bg-border text-[7px] flex items-center justify-center font-bold text-t4 font-mono">{label?.[0]}</span>
       )}
-      {!icon && <span className="w-4 h-4 shrink-0 rounded bg-surface-border text-[8px] flex items-center justify-center font-bold text-text-muted">{label?.[0]}</span>}
       <span className="truncate">{label}</span>
-      {count > 0 && <span className="ml-auto text-[10px] text-text-muted tabular-nums">{count}</span>}
+      {count > 0 && <span className="ml-auto font-mono text-[10px] text-t4 tabular-nums">{count}</span>}
     </button>
   );
 }

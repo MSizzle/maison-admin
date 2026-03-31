@@ -16,10 +16,7 @@ export default function AnalyticsDashboard() {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const ws = new WebSocket(`${proto}//${window.location.host}/ws?type=dashboard`);
       wsRef.current = ws;
-      ws.onmessage = (e) => {
-        const msg = JSON.parse(e.data);
-        if (msg.type === 'active_visitors') setActiveVisitors(msg.data);
-      };
+      ws.onmessage = (e) => { const msg = JSON.parse(e.data); if (msg.type === 'active_visitors') setActiveVisitors(msg.data); };
       ws.onclose = () => setTimeout(connect, 3000);
     }
     connect();
@@ -29,23 +26,18 @@ export default function AnalyticsDashboard() {
   const filters = { ...dateRange, country: countryFilter, page_url: pageFilter };
 
   return (
-    <div className="p-8 space-y-6 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-text-primary tracking-tight">Analytics</h1>
-          <p className="text-[13px] text-text-muted mt-1">Visitor insights for Moulin à Rêves</p>
-        </div>
+    <div className="p-6 space-y-4 max-w-[1600px]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-lg font-semibold text-t1">Analytics</h1>
         <div className="flex items-center gap-2">
-          <FilterInput type="date" value={dateRange.start.split('T')[0]} onChange={(v) => setDateRange((r) => ({ ...r, start: v + 'T00:00:00' }))} />
-          <span className="text-text-muted text-xs">—</span>
-          <FilterInput type="date" value={dateRange.end.split('T')[0]} onChange={(v) => setDateRange((r) => ({ ...r, end: v + 'T23:59:59' }))} />
-          <div className="w-px h-6 bg-surface-border mx-1" />
-          <FilterInput type="text" placeholder="Country" value={countryFilter} onChange={setCountryFilter} className="w-28" />
-          <FilterInput type="text" placeholder="Page" value={pageFilter} onChange={setPageFilter} className="w-28" />
+          <Input type="date" value={dateRange.start.split('T')[0]} onChange={(v) => setDateRange(r => ({ ...r, start: v + 'T00:00:00' }))} />
+          <span className="text-t4 text-xs">to</span>
+          <Input type="date" value={dateRange.end.split('T')[0]} onChange={(v) => setDateRange(r => ({ ...r, end: v + 'T23:59:59' }))} />
+          <span className="text-border mx-1">|</span>
+          <Input type="text" placeholder="country" value={countryFilter} onChange={setCountryFilter} w="w-24" />
+          <Input type="text" placeholder="page" value={pageFilter} onChange={setPageFilter} w="w-24" />
         </div>
       </div>
-
       <LiveVisitors visitors={activeVisitors} />
       <Charts filters={filters} />
       <MapView filters={filters} />
@@ -54,23 +46,10 @@ export default function AnalyticsDashboard() {
   );
 }
 
-function FilterInput({ type, value, onChange, placeholder, className = '' }) {
-  return (
-    <input
-      type={type}
-      value={value}
-      placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)}
-      className={`bg-white border border-surface-border rounded-lg px-3 py-1.5 text-[13px] text-text-primary placeholder-text-muted focus:border-blue-primary focus:ring-1 focus:ring-blue-primary/20 focus:outline-none shadow-card transition-shadow hover:shadow-raised ${className}`}
-    />
-  );
+function Input({ type, value, onChange, placeholder, w = '' }) {
+  return <input type={type} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)}
+    className={`bg-card border border-border rounded px-2.5 py-1 text-xs text-t1 placeholder-t4 focus:border-accent focus:outline-none font-mono ${w}`} />;
 }
 
-function getDefaultStart() {
-  const d = new Date();
-  d.setDate(d.getDate() - 30);
-  return d.toISOString().split('T')[0] + 'T00:00:00';
-}
-function getDefaultEnd() {
-  return new Date().toISOString().split('T')[0] + 'T23:59:59';
-}
+function getDefaultStart() { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().split('T')[0] + 'T00:00:00'; }
+function getDefaultEnd() { return new Date().toISOString().split('T')[0] + 'T23:59:59'; }

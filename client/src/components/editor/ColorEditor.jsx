@@ -1,70 +1,49 @@
 import ColorPicker from './ColorPicker';
 
-const COLOR_LABELS = {
-  'bg-cream': 'Page Background',
-  'bg-warm-white': 'Warm White',
-  'bg-stone': 'Stone Accent',
-  'bg-dark': 'Dark Background',
-  'blue-primary': 'Primary Blue',
-  'blue-dark': 'Dark Blue',
-  'blue-light': 'Light Blue',
-  'blue-pale': 'Pale Blue',
-  'text-primary': 'Body Text',
-  'text-secondary': 'Secondary Text',
-  'text-light': 'Light Text',
-  'text-on-dark': 'Text on Dark',
-  'gold': 'Gold Accent',
-  'green-garden': 'Garden Green',
-  'terracotta': 'Terracotta',
+const LABELS = {
+  'bg-cream': 'bg-cream', 'bg-warm-white': 'bg-warm-white', 'bg-stone': 'bg-stone', 'bg-dark': 'bg-dark',
+  'blue-primary': 'blue-primary', 'blue-dark': 'blue-dark', 'blue-light': 'blue-light', 'blue-pale': 'blue-pale',
+  'text-primary': 'text-primary', 'text-secondary': 'text-secondary', 'text-light': 'text-light', 'text-on-dark': 'text-on-dark',
+  'gold': 'gold', 'green-garden': 'green-garden', 'terracotta': 'terracotta',
 };
 
 const GROUPS = {
-  'Backgrounds': ['bg-cream', 'bg-warm-white', 'bg-stone', 'bg-dark'],
-  'Brand Blues': ['blue-primary', 'blue-dark', 'blue-light', 'blue-pale'],
-  'Text Colors': ['text-primary', 'text-secondary', 'text-light', 'text-on-dark'],
-  'Accents': ['gold', 'green-garden', 'terracotta'],
+  'BACKGROUNDS': ['bg-cream', 'bg-warm-white', 'bg-stone', 'bg-dark'],
+  'BLUES': ['blue-primary', 'blue-dark', 'blue-light', 'blue-pale'],
+  'TEXT': ['text-primary', 'text-secondary', 'text-light', 'text-on-dark'],
+  'ACCENTS': ['gold', 'green-garden', 'terracotta'],
 };
 
 export default function ColorEditor({ colors, fonts, onUpdateColors }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h3 className="text-[13px] font-bold text-text-primary mb-0.5">Design System</h3>
-        <p className="text-[11px] text-text-muted">CSS custom properties for the Moulin à Rêves site.</p>
+        <span className="text-xs font-semibold text-t1">CSS Variables</span>
+        <p className="text-[10px] text-t4 font-mono mt-0.5">global.css :root</p>
       </div>
 
-      {Object.entries(GROUPS).map(([groupName, keys]) => (
-        <div key={groupName}>
-          <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2.5">{groupName}</h4>
-          <div className="space-y-2.5">
-            {keys.map((key) =>
-              colors[key] !== undefined ? (
-                <div key={key} className="flex items-center gap-3">
-                  <ColorPicker
-                    color={colors[key]}
-                    onChange={(c) => onUpdateColors({ ...colors, [key]: c })}
-                  />
-                  <div className="min-w-0">
-                    <p className="text-[12px] text-text-primary font-medium">{COLOR_LABELS[key] || key}</p>
-                    <p className="text-[10px] text-text-muted font-mono">--{key}</p>
-                  </div>
-                </div>
-              ) : null
-            )}
+      {Object.entries(GROUPS).map(([group, keys]) => (
+        <div key={group}>
+          <p className="font-mono text-[9px] text-t4 tracking-widest mb-2">{group}</p>
+          <div className="space-y-2">
+            {keys.map(key => colors[key] !== undefined ? (
+              <div key={key} className="flex items-center gap-2.5">
+                <ColorPicker color={colors[key]} onChange={c => onUpdateColors({ ...colors, [key]: c })} />
+                <span className="font-mono text-[11px] text-t3">--{key}</span>
+              </div>
+            ) : null)}
           </div>
         </div>
       ))}
 
       <div>
-        <h4 className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2.5">Typography</h4>
-        <div className="space-y-1.5">
-          {Object.entries(fonts || {}).map(([key, value]) => (
-            <div key={key} className="bg-surface-raised rounded-lg px-3 py-2 border border-surface-border">
-              <p className="text-[10px] text-text-muted font-mono">--{key}</p>
-              <p className="text-[12px] text-text-primary font-medium">{value}</p>
-            </div>
-          ))}
-        </div>
+        <p className="font-mono text-[9px] text-t4 tracking-widest mb-2">FONTS</p>
+        {Object.entries(fonts || {}).map(([key, value]) => (
+          <div key={key} className="bg-panel rounded px-2.5 py-1.5 border border-border mb-1.5">
+            <span className="font-mono text-[10px] text-t4">--{key}</span>
+            <p className="text-xs text-t2">{value}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

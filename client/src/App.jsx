@@ -9,16 +9,11 @@ export default function App() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: { background: '#fff', color: '#111827', border: '1px solid #E5E7EB', fontFamily: 'DM Sans', fontWeight: 500 },
-          success: { iconTheme: { primary: '#2E5A88', secondary: '#fff' } },
-          error: { iconTheme: { primary: '#C4703F', secondary: '#fff' } },
-        }}
-      />
+      <Toaster position="top-right" toastOptions={{
+        style: { background: '#1C1F2B', color: '#E2E8F0', border: '1px solid #2A2D3A', fontSize: '13px' },
+      }} />
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="flex-1 overflow-auto bg-surface-bg">
+      <main className="flex-1 overflow-auto">
         {activeTab === 'analytics' ? <AnalyticsDashboard /> : <EditorPanel />}
       </main>
     </div>

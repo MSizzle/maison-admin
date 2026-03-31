@@ -5,52 +5,38 @@ export default function LiveVisitors({ visitors }) {
   const prevIds = useRef(new Set());
 
   useEffect(() => {
-    const currentIds = new Set(visitors.map((v) => v.visitor_id));
-    const arriving = new Set();
-    for (const id of currentIds) {
-      if (!prevIds.current.has(id)) arriving.add(id);
-    }
-    if (arriving.size > 0) {
-      setNewIds(arriving);
-      setTimeout(() => setNewIds(new Set()), 2000);
-    }
-    prevIds.current = currentIds;
+    const cur = new Set(visitors.map(v => v.visitor_id));
+    const arriving = new Set([...cur].filter(id => !prevIds.current.has(id)));
+    if (arriving.size > 0) { setNewIds(arriving); setTimeout(() => setNewIds(new Set()), 2000); }
+    prevIds.current = cur;
   }, [visitors]);
 
   return (
-    <div className="bg-white rounded-xl border border-surface-border p-5 shadow-card">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex items-center gap-2 bg-garden/10 px-3 py-1 rounded-full">
-          <div className="relative">
-            <div className="w-2 h-2 rounded-full bg-garden" />
-            <div className="absolute inset-0 w-2 h-2 rounded-full bg-garden animate-ping opacity-75" />
-          </div>
-          <span className="text-[13px] font-semibold text-garden">Live</span>
+    <div className="bg-card border border-border rounded-lg p-4">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-1.5 bg-green/10 px-2 py-0.5 rounded font-mono text-[11px] text-green font-medium">
+          <div className="w-1.5 h-1.5 rounded-full bg-green animate-pulse-dot" />
+          LIVE
         </div>
-        <h2 className="font-display text-xl font-bold text-text-primary">Visitors</h2>
-        <span className="ml-auto text-4xl font-display font-bold text-blue-primary tabular-nums">{visitors.length}</span>
+        <span className="text-sm font-semibold text-t1">Active Visitors</span>
+        <span className="ml-auto text-2xl font-bold font-mono text-accent tabular-nums">{visitors.length}</span>
       </div>
 
       {visitors.length === 0 ? (
-        <p className="text-text-muted text-sm py-4">No active visitors right now</p>
+        <p className="text-t4 text-xs font-mono py-3">No active sessions</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
-          {visitors.map((v) => (
-            <div
-              key={v.visitor_id}
-              className={`bg-surface-raised rounded-lg px-3 py-2.5 border transition-all ${
-                newIds.has(v.visitor_id) ? 'border-garden/40 animate-fade-in shadow-raised' : 'border-surface-border'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[11px] font-mono text-text-muted">{v.visitor_id.slice(0, 8)}</span>
-                <div className="w-1.5 h-1.5 rounded-full bg-garden animate-pulse-dot" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+          {visitors.map(v => (
+            <div key={v.visitor_id} className={`bg-panel rounded px-3 py-2 border transition-all ${
+              newIds.has(v.visitor_id) ? 'border-green/40 animate-fade-in' : 'border-border'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] text-t4">{v.visitor_id.slice(0, 8)}</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-green" />
               </div>
-              <p className="text-[13px] text-text-primary truncate font-semibold">{v.page_url}</p>
-              <p className="text-[11px] text-text-muted mt-0.5">
-                {v.city && v.country ? `${v.city}, ${v.country}` : 'Unknown'}
-                <span className="mx-1">·</span>
-                <span className="capitalize">{v.device || 'desktop'}</span>
+              <p className="text-xs text-t1 truncate font-medium mt-0.5">{v.page_url}</p>
+              <p className="text-[10px] text-t4 font-mono mt-0.5">
+                {v.city && v.country ? `${v.city}, ${v.country}` : '—'} · {v.device || 'desktop'}
               </p>
             </div>
           ))}
