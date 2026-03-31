@@ -1,0 +1,71 @@
+{
+  "colors": {
+    "primary": "#3B82F6",
+    "secondary": "#10B981",
+    "background": "#FFFFFF",
+    "text": "#111827"
+  },
+  "fonts": {
+    "heading": {
+      "family": "Inter",
+      "size": "2.5rem",
+      "color": "#111827",
+      "weight": "700"
+    },
+    "body": {
+      "family": "Inter",
+      "size": "1rem",
+      "color": "#374151",
+      "weight": "400"
+    }
+  },
+  "sections": [
+    {
+      "id": "hero",
+      "type": "hero",
+      "headline": "Welcome to Our Site",
+      "subheadline": "We build great things",
+      "cta_text": "Get Started",
+      "cta_link": "/signup",
+      "background_image": "/images/hero.jpg",
+      "background_color": "#1E293B"
+    },
+    {
+      "id": "about",
+      "type": "about",
+      "headline": "About Us",
+      "body": "We are a team of passionate creators building beautiful digital experiences. Our mission is to make the web a more beautiful place.",
+      "background_color": "#FFFFFF"
+    },
+    {
+      "id": "features",
+      "type": "features",
+      "headline": "Our Features",
+      "items": [
+        {
+          "title": "Fast",
+          "description": "Lightning-fast performance"
+        },
+        {
+          "title": "Secure",
+          "description": "Enterprise-grade security"
+        },
+        {
+          "title": "Scalable",
+          "description": "Grows with your needs"
+        }
+      ],
+      "background_color": "#F8FAFC"
+    },
+    {
+      "id": "footer",
+      "type": "footer",
+      "text": "© 2026 Our Company. All rights reserved.",
+      "background_color": "#0F172A"
+    }
+  ],
+  "images": {
+    "logo": "/images/logo.png",
+    "hero_bg": "/images/hero.jpg"
+  }
+}
