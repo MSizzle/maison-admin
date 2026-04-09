@@ -116,7 +116,8 @@ function parseCookies(req) {
   return obj;
 }
 
-// Login page
+// Login page (served at both /login and /analytics/login)
+app.get('/analytics/login', (req, res) => res.redirect('/login'));
 app.get('/login', (req, res) => {
   const error = req.query.error ? '<p style="color:#e74c3c;margin-bottom:16px;font-size:14px;">Wrong password. Try again.</p>' : '';
   res.type('html').send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -139,7 +140,7 @@ app.post('/login', express.urlencoded({ extended: false }), (req, res) => {
     const token = crypto.randomBytes(32).toString('hex');
     activeSessions.add(token);
     res.setHeader('Set-Cookie', `maison_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
-    res.redirect('/');
+    res.redirect('/analytics/');
   } else {
     res.redirect('/login?error=1');
   }
@@ -499,7 +500,12 @@ setInterval(() => {
 // ─── Serve client in production ──────────────────────────────────
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 if (fs.existsSync(clientDist)) {
+  // Serve under /analytics/ (for Vercel proxy) and / (for direct Railway access)
+  app.use('/analytics', express.static(clientDist));
   app.use(express.static(clientDist));
+  app.get('/analytics/*', (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
