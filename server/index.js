@@ -174,7 +174,7 @@ function requireAuth(req, res, next) {
     return next();
   }
   // If it's an API call, return 401 JSON
-  if (req.path.startsWith('/api/')) {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/analytics/api/')) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   res.redirect('/analytics/login');

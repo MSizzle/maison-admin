@@ -4,6 +4,7 @@ import SectionEditor from './SectionEditor';
 import PreviewFrame from './PreviewFrame';
 import Toolbar from '../shared/Toolbar';
 import ColorEditor from './ColorEditor';
+import { API_BASE } from '../../config';
 
 export default function EditorPanel() {
   const [siteData, setSiteData] = useState(null);
@@ -16,7 +17,7 @@ export default function EditorPanel() {
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   useEffect(() => {
-    fetch('/api/site')
+    fetch(`${API_BASE}/api/site`)
       .then((r) => r.json())
       .then((data) => {
         setSiteData(data);
@@ -81,7 +82,7 @@ export default function EditorPanel() {
         Object.entries(siteData.pages).flatMap(([, keys]) => Object.entries(keys))
       );
 
-      const res = await fetch('/api/site/save', {
+      const res = await fetch(`${API_BASE}/api/site/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ colors: siteData.colors, translations: allTranslations }),
@@ -107,7 +108,7 @@ export default function EditorPanel() {
         Object.entries(siteData.pages).flatMap(([, keys]) => Object.entries(keys))
       );
 
-      const res = await fetch('/api/site/publish', {
+      const res = await fetch(`${API_BASE}/api/site/publish`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ colors: siteData.colors, translations: allTranslations }),
@@ -128,7 +129,7 @@ export default function EditorPanel() {
   const revert = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/site');
+      const res = await fetch(`${API_BASE}/api/site`);
       const data = await res.json();
       setSiteData(data);
       pushHistory(data);
