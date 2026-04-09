@@ -116,11 +116,8 @@ function parseCookies(req) {
   return obj;
 }
 
-// Login page (served at both /login and /analytics/login)
-app.get('/analytics/login', (req, res) => res.redirect('/login'));
-app.get('/login', (req, res) => {
-  const error = req.query.error ? '<p style="color:#e74c3c;margin-bottom:16px;font-size:14px;">Wrong password. Try again.</p>' : '';
-  res.type('html').send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+// Login page — all paths use /analytics/ prefix for Vercel proxy compatibility
+const loginPage = (error) => `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Maison Admin</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0F1117;font-family:-apple-system,system-ui,sans-serif;color:#E2E8F0}
 .card{background:#1C1F2B;border:1px solid #2A2D3A;border-radius:12px;padding:40px;width:min(380px,90vw);text-align:center}
@@ -130,27 +127,31 @@ input:focus{border-color:#6366F1}
 button{width:100%;padding:12px;background:#6366F1;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
 button:hover{background:#5558E6}
 </style></head><body><div class="card">
-<h1>Maison Dashboard</h1>${error}
-<form method="POST" action="/login"><input type="password" name="password" placeholder="Password" autofocus required>
-<button type="submit">Enter</button></form></div></body></html>`);
-});
+<h1>Maison Dashboard</h1>${error ? '<p style="color:#e74c3c;margin-bottom:16px;font-size:14px;">Wrong password. Try again.</p>' : ''}
+<form method="POST" action="/analytics/login"><input type="password" name="password" placeholder="Password" autofocus required>
+<button type="submit">Enter</button></form></div></body></html>`;
 
-app.post('/login', express.urlencoded({ extended: false }), (req, res) => {
+app.get('/analytics/login', (req, res) => res.type('html').send(loginPage(req.query.error)));
+app.get('/login', (req, res) => res.redirect('/analytics/login'));
+
+app.post('/analytics/login', express.urlencoded({ extended: false }), (req, res) => {
   if (req.body.password === DASHBOARD_PASSWORD) {
     const token = crypto.randomBytes(32).toString('hex');
     activeSessions.add(token);
     res.setHeader('Set-Cookie', `maison_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
     res.redirect('/analytics/');
   } else {
-    res.redirect('/login?error=1');
+    res.redirect('/analytics/login?error=1');
   }
 });
+app.post('/login', (req, res) => res.redirect(307, '/analytics/login'));
 
 // Auth middleware — skip for public endpoints
 function requireAuth(req, res, next) {
   // Public: tracker, events API, health, login, static assets
   if (req.path === '/health' ||
       req.path === '/login' ||
+      req.path === '/analytics/login' ||
       req.path === '/tracker.js' ||
       req.path.startsWith('/api/events')) {
     return next();
@@ -163,7 +164,7 @@ function requireAuth(req, res, next) {
   if (req.path.startsWith('/api/')) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  res.redirect('/login');
+  res.redirect('/analytics/login');
 }
 
 app.use(requireAuth);
