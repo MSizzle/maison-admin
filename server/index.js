@@ -17,7 +17,7 @@ const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, noServer: true });
+const wss = new WebSocketServer({ noServer: true });
 
 // Accept WebSocket upgrades at both /ws and /analytics/ws
 server.on('upgrade', (req, socket, head) => {
