@@ -13,11 +13,14 @@ const { resolveIP } = require('./geo');
 const { deploy } = require('./deploy');
 const moulin = require('./moulin');
 
+const crypto = require('crypto');
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 const PORT = process.env.PORT || 3002;
+const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'moulin2024';
 const CONFIG_DIR = path.join(__dirname, '..');
 // In production on Railway, use /data volume for persistent storage
 const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || path.join(__dirname, '..');
@@ -100,6 +103,69 @@ if (isProduction) {
 } else {
   app.use('/api', cors({ origin: ['http://localhost:5174', 'http://127.0.0.1:5174'] }));
 }
+
+// ─── Simple Password Auth ────────────────────────────────────────
+const activeSessions = new Set();
+
+function parseCookies(req) {
+  const obj = {};
+  (req.headers.cookie || '').split(';').forEach(pair => {
+    const [k, v] = pair.trim().split('=');
+    if (k) obj[k] = decodeURIComponent(v || '');
+  });
+  return obj;
+}
+
+// Login page
+app.get('/login', (req, res) => {
+  const error = req.query.error ? '<p style="color:#e74c3c;margin-bottom:16px;font-size:14px;">Wrong password. Try again.</p>' : '';
+  res.type('html').send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maison Admin</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0F1117;font-family:-apple-system,system-ui,sans-serif;color:#E2E8F0}
+.card{background:#1C1F2B;border:1px solid #2A2D3A;border-radius:12px;padding:40px;width:min(380px,90vw);text-align:center}
+h1{font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#94A3B8;margin-bottom:24px}
+input{width:100%;padding:12px 16px;background:#0F1117;border:1px solid #2A2D3A;border-radius:8px;color:#E2E8F0;font-size:15px;margin-bottom:16px;outline:none}
+input:focus{border-color:#6366F1}
+button{width:100%;padding:12px;background:#6366F1;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+button:hover{background:#5558E6}
+</style></head><body><div class="card">
+<h1>Maison Dashboard</h1>${error}
+<form method="POST" action="/login"><input type="password" name="password" placeholder="Password" autofocus required>
+<button type="submit">Enter</button></form></div></body></html>`);
+});
+
+app.post('/login', express.urlencoded({ extended: false }), (req, res) => {
+  if (req.body.password === DASHBOARD_PASSWORD) {
+    const token = crypto.randomBytes(32).toString('hex');
+    activeSessions.add(token);
+    res.setHeader('Set-Cookie', `maison_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`);
+    res.redirect('/');
+  } else {
+    res.redirect('/login?error=1');
+  }
+});
+
+// Auth middleware — skip for public endpoints
+function requireAuth(req, res, next) {
+  // Public: tracker, events API, health, login, static assets
+  if (req.path === '/health' ||
+      req.path === '/login' ||
+      req.path === '/tracker.js' ||
+      req.path.startsWith('/api/events')) {
+    return next();
+  }
+  const cookies = parseCookies(req);
+  if (cookies.maison_session && activeSessions.has(cookies.maison_session)) {
+    return next();
+  }
+  // If it's an API call, return 401 JSON
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.redirect('/login');
+}
+
+app.use(requireAuth);
 
 // Healthcheck
 app.get('/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
