@@ -1,5 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { API_BASE } from '../../config';
 
 function Charts({ filters }) {
   const [topPages, setTopPages] = useState([]);
@@ -12,9 +13,9 @@ function Charts({ filters }) {
     setLoading(true);
     const p = new URLSearchParams({ start: filters.start, end: filters.end });
     Promise.all([
-      fetch(`/api/analytics/top-pages?${p}`).then(r => r.json()),
-      fetch(`/api/analytics/traffic?${p}&group=${timeGroup}`).then(r => r.json()),
-      fetch(`/api/analytics/geo?${p}`).then(r => r.json()),
+      fetch(`${API_BASE}/api/analytics/top-pages?${p}`).then(r => r.json()),
+      fetch(`${API_BASE}/api/analytics/traffic?${p}&group=${timeGroup}`).then(r => r.json()),
+      fetch(`${API_BASE}/api/analytics/geo?${p}`).then(r => r.json()),
     ]).then(([a, b, c]) => { setTopPages(a); setTraffic(b); setGeo(c); setLoading(false); }).catch(() => setLoading(false));
   }, [filters.start, filters.end, timeGroup]);
 

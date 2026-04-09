@@ -17,7 +17,19 @@ const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: '/ws' });
+const wss = new WebSocketServer({ server, noServer: true });
+
+// Accept WebSocket upgrades at both /ws and /analytics/ws
+server.on('upgrade', (req, socket, head) => {
+  const pathname = new URL(req.url, `http://localhost`).pathname;
+  if (pathname === '/ws' || pathname === '/analytics/ws') {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req);
+    });
+  } else {
+    socket.destroy();
+  }
+});
 
 const PORT = process.env.PORT || 3002;
 const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'moulin2024';
@@ -169,6 +181,14 @@ function requireAuth(req, res, next) {
 }
 
 app.use(requireAuth);
+
+// Strip /analytics prefix so API routes work from both /api and /analytics/api
+app.use((req, res, next) => {
+  if (req.path.startsWith('/analytics/api/') || req.path.startsWith('/analytics/images/')) {
+    req.url = req.url.replace('/analytics/', '/');
+  }
+  next();
+});
 
 // Healthcheck
 app.get('/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));

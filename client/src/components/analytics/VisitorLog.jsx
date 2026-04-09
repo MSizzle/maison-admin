@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE } from '../../config';
 
 export default function VisitorLog({ filters }) {
   const [events, setEvents] = useState([]);
@@ -16,7 +17,7 @@ export default function VisitorLog({ filters }) {
       ...(filters.start && { start: filters.start }), ...(filters.end && { end: filters.end }),
       ...(filters.country && { country: filters.country }), ...(filters.page_url && { page_url: filters.page_url }),
     });
-    try { const r = await fetch(`/api/events?${params}`); const d = await r.json(); setEvents(d.events || []); setPagination(d.pagination || { page: 1, pages: 1, total: 0 }); }
+    try { const r = await fetch(`${API_BASE}/api/events?${params}`); const d = await r.json(); setEvents(d.events || []); setPagination(d.pagination || { page: 1, pages: 1, total: 0 }); }
     catch { setEvents([]); }
     setLoading(false);
   }

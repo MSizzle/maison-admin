@@ -1,5 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
+import { API_BASE } from '../../config';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
@@ -11,7 +12,7 @@ function MapView({ filters }) {
   useEffect(() => {
     setLoading(true);
     const p = new URLSearchParams({ start: filters.start, end: filters.end });
-    fetch(`/api/analytics/locations?${p}`).then(r => r.json())
+    fetch(`${API_BASE}/api/analytics/locations?${p}`).then(r => r.json())
       .then(d => { setLocations(d.filter(x => x.lat && x.lon)); setLoading(false); })
       .catch(() => setLoading(false));
   }, [filters.start, filters.end]);

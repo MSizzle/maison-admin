@@ -3,6 +3,7 @@ import LiveVisitors from './LiveVisitors';
 import VisitorLog from './VisitorLog';
 import MapView from './MapView';
 import Charts from './Charts';
+import { getWSUrl } from '../../config';
 
 export default function AnalyticsDashboard() {
   const [activeVisitors, setActiveVisitors] = useState([]);
@@ -13,8 +14,7 @@ export default function AnalyticsDashboard() {
 
   useEffect(() => {
     function connect() {
-      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${proto}//${window.location.host}/ws?type=dashboard`);
+      const ws = new WebSocket(getWSUrl('type=dashboard'));
       wsRef.current = ws;
       ws.onmessage = (e) => { const msg = JSON.parse(e.data); if (msg.type === 'active_visitors') setActiveVisitors(msg.data); };
       ws.onclose = () => setTimeout(connect, 3000);
