@@ -132,9 +132,9 @@ button:hover{background:#5558E6}
 <button type="submit">Enter</button></form></div></body></html>`;
 
 app.get('/analytics/login', (req, res) => res.type('html').send(loginPage(req.query.error)));
-app.get('/login', (req, res) => res.redirect('/analytics/login'));
+app.get('/login', (req, res) => res.type('html').send(loginPage(req.query.error)));
 
-app.post('/analytics/login', express.urlencoded({ extended: false }), (req, res) => {
+function handleLogin(req, res) {
   if (req.body.password === DASHBOARD_PASSWORD) {
     const token = crypto.randomBytes(32).toString('hex');
     activeSessions.add(token);
@@ -143,8 +143,9 @@ app.post('/analytics/login', express.urlencoded({ extended: false }), (req, res)
   } else {
     res.redirect('/analytics/login?error=1');
   }
-});
-app.post('/login', (req, res) => res.redirect(307, '/analytics/login'));
+}
+app.post('/analytics/login', express.urlencoded({ extended: false }), handleLogin);
+app.post('/login', express.urlencoded({ extended: false }), handleLogin);
 
 // Auth middleware — skip for public endpoints
 function requireAuth(req, res, next) {
