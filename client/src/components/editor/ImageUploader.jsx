@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
-import { API_BASE } from '../../config';
+import { API_BASE, authFetch } from '../../config';
 
 export default function ImageUploader({ currentImage, onUpload }) {
   const [uploading, setUploading] = useState(false);
@@ -25,7 +25,7 @@ export default function ImageUploader({ currentImage, onUpload }) {
       formData.append('image', file);
 
       try {
-        const res = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
+        const res = await authFetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
         const data = await res.json();
         if (data.ok) {
           onUpload(data.path);

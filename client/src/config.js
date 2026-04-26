@@ -1,11 +1,12 @@
-// Base path for API calls — works both through Vercel proxy and direct Railway access
-const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // '/analytics' or ''
+// API base — empty string since API routes are on the same Vercel domain
+export const API_BASE = '';
 
-export const API_BASE = base;
-
-// WebSocket URL — connect to Railway directly since Vercel rewrites don't support WS
-export function getWSUrl(params) {
-  const loc = window.location;
-  const proto = loc.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${proto}//${loc.host}${base}/ws?${params}`;
+// Wrapper around fetch that redirects to login on 401
+export async function authFetch(url, options) {
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    window.location.href = '/api/auth/login';
+    return new Response(JSON.stringify({}), { status: 401 });
+  }
+  return res;
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const SITE_URL = 'https://maison-melissa.netlify.app';
+const SITE_URL = 'https://www.moulinareves.com';
 const PAGES = [
   { path: '/', label: 'Home' }, { path: '/homes/', label: 'Homes' },
   { path: '/homes/le-moulin/', label: 'Le Moulin' }, { path: '/homes/la-grange/', label: 'La Grange' },
@@ -42,7 +42,7 @@ export default function PreviewFrame() {
       </div>
       <div className="flex-1 overflow-auto bg-bg">
         <div className={`h-full transition-all duration-200 ${w[vp]}`}>
-          <iframe src={`${SITE_URL}${page}`} title="Preview" className="w-full h-full border-0" key={page} />
+          <iframe src={`${SITE_URL}${page}?edit=1`} title="Preview" className="w-full h-full border-0" key={page} />
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@ import SectionEditor from './SectionEditor';
 import PreviewFrame from './PreviewFrame';
 import Toolbar from '../shared/Toolbar';
 import ColorEditor from './ColorEditor';
-import { API_BASE } from '../../config';
+import { API_BASE, authFetch } from '../../config';
 
 export default function EditorPanel() {
   const [siteData, setSiteData] = useState(null);
@@ -17,7 +17,7 @@ export default function EditorPanel() {
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/site`)
+    authFetch(`${API_BASE}/api/site`)
       .then((r) => r.json())
       .then((data) => {
         setSiteData(data);
@@ -82,7 +82,7 @@ export default function EditorPanel() {
         Object.entries(siteData.pages).flatMap(([, keys]) => Object.entries(keys))
       );
 
-      const res = await fetch(`${API_BASE}/api/site/save`, {
+      const res = await authFetch(`${API_BASE}/api/site/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ colors: siteData.colors, translations: allTranslations }),
@@ -108,14 +108,14 @@ export default function EditorPanel() {
         Object.entries(siteData.pages).flatMap(([, keys]) => Object.entries(keys))
       );
 
-      const res = await fetch(`${API_BASE}/api/site/publish`, {
+      const res = await authFetch(`${API_BASE}/api/site/publish`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ colors: siteData.colors, translations: allTranslations }),
       });
       const data = await res.json();
       if (data.ok) {
-        toast.success('Published to Netlify!');
+        toast.success('Published to Vercel!');
         setDirty(false);
       } else {
         toast.error(data.error || 'Publish failed');
@@ -129,7 +129,7 @@ export default function EditorPanel() {
   const revert = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/site`);
+      const res = await authFetch(`${API_BASE}/api/site`);
       const data = await res.json();
       setSiteData(data);
       pushHistory(data);
@@ -156,6 +156,30 @@ export default function EditorPanel() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo, siteData]);
+
+  // Click-to-edit: receive edits from the live preview iframe.
+  // The inject script in the live site posts { type: 'mar-i18n-edit', key, lang, value }
+  // on every keystroke. We merge into siteData.pages keyed by the prefix of `key`.
+  useEffect(() => {
+    function onMessage(e) {
+      const data = e && e.data;
+      if (!data || typeof data !== 'object') return;
+      if (data.type !== 'mar-i18n-edit') return;
+      const { key, lang, value } = data;
+      if (!key || !lang) return;
+      const sectionId = String(key).split('.')[0];
+      updateSiteData((prev) => {
+        if (!prev) return prev;
+        const sections = prev.pages || {};
+        const section = sections[sectionId] ? { ...sections[sectionId] } : {};
+        const existing = section[key] && typeof section[key] === 'object' ? section[key] : {};
+        section[key] = { ...existing, [lang]: value };
+        return { ...prev, pages: { ...sections, [sectionId]: section } };
+      });
+    }
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [updateSiteData]);
 
   if (loading) {
     return (
